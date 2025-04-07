@@ -7,8 +7,8 @@ Properties are:
 2) "material": a "Material" object of the material class defining the material properties of the component
 3) "axis": a 3-element vector representing the axis along which the component is rotating with respect to a defined reference frame
 4) "loc": a 3-element vector representing the location of the component with respect to a defined reference frame
-5) "F_tot": the total force acting on the component
-6) "T_tot": the total torque acting on the component
+5) "F_tot": the total force acting on the component expressed in [N]
+6) "T_tot": the total torque acting on the component expressed in [Nm]
 '''
 class Component:
 
