@@ -23,9 +23,11 @@ class InputMotor(Component):
     
     # Constructor
     def __init__(self, name, power, n, axis, loc):
+        # Given properties
         super().__init__(name=name, material=None, axis=axis, loc=loc, F_tot=None, T_tot=None, omega=None)
         self.power = power
         self.n = n
+        # Calculated properties
         self.omega = self.n * pi / 30 * self.axis
         self.T_tot = Torque(np.array([0 if o == 0 else self.power/o for o in self.omega]), self.loc)
         self.F_tot = Force(np.array([0, 0, 0]), self.loc)
