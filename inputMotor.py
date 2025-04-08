@@ -12,5 +12,5 @@ class InputMotor(Component):
         self.n = n
         self.omega = self.n * pi / 30 * self.axis
         self.T_tot = Torque(np.array([0 if o == 0 else self.power/o for o in self.omega]), self.loc)
-        self.F_tot = Force(np.array([0, 0, 0]), np.array([0, 0, 0]))
+        self.F_tot = Force(np.array([0, 0, 0]), self.loc)
         
