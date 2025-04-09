@@ -1,5 +1,12 @@
+'''
+This is the GeometricStressRaiser class.
+It contains the data and the necessary calculations via interpolation to get the final factor.
+The properties are:
+1) "Kt_B": bending geometric stress raiser
+2) "Kt_N": normal geometric stress raiser
+3) "Kt_T": torsion geometric stress raiser
+'''
 import numpy as np
-from scipy.interpolate import RegularGridInterpolator
 from makima2dInterpolator import Makima2DInterpolator
 import matplotlib.pyplot as plt
 class GeometricStressRaiser():
