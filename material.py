@@ -20,5 +20,6 @@ class Material:
         self.HB = HB
     
     # Component Fatigue Limit
-    def ComponenFatigueLimit(self, section):
+    def ComponentFatigueLimit(self, section):
         self.sigma_Dm1C = self.sigma_Dm1*section.FLCF.C
+        return self
