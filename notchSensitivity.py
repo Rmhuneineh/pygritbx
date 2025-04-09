@@ -1,3 +1,7 @@
+'''
+This is the NotchSensitivity class.
+It contains the data and the necessary calculations via interpolation to get the final factor.
+'''
 import numpy as np
 import matplotlib.pyplot as plt
 from makima2dInterpolator import Makima2DInterpolator
