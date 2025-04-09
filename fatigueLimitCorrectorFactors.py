@@ -4,7 +4,7 @@ It contains the data and the necessary calculations via interpolation to get the
 The properties are:
 1) "Cs": size factor
 2) "Cl": load factor
-3J) "Cf": surface finish factor
+3) "Cf": surface finish factor
 '''
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
