@@ -1,3 +1,27 @@
+'''
+This is the "ShaftSection" class.
+It's used to define certain sections of a "Shaft" component along its profile.
+It has the following properties:
+I) Given Properties:
+--> 1) "name": a string of characters acting as a label
+--> 2) "loc": a 3-D element vector representing the location of the section along the shaft
+--> 3) "d": a scalar representing the diameter of the shaft at the specified cross-section expressed in [mm]
+--> 4) "Ra": a scalar representing the surface roughness at the specified cross-section expressed in [micrometers]
+--> 5) "material": a Material object representing the material of the shaft
+II) Calculated Properties:
+--> 1) "sigma_m_Mb": mean bending stress [MPa]
+--> 2) "sigma_a_Mb": alternating bending stress [MPa]
+--> 3) "sigma_m_N": mean normal stress [MPa]
+--> 4) "sigma_a_N": alternating normal stress [MPa]
+--> 5) "tau_m_Mt": mean torsional stress [MPa]
+--> 6) "tau_a_Mt": alternating torsional stress [MPa]
+--> 7) "Kt_B": bending stress concentration rasiser
+--> 8) "Kt_N": normal stress concentration raiser
+--> 9) "Kt_T": torsion stress concentration raiser
+--> 10) "Kf_B": bending stress concentration factor
+--> 11) "Kf_N": normal stress concentration factor
+--> 12) "Kf_T": torsion stress concentration factor
+'''
 from notchSensitivity import NotchSensitivity
 from fatigueLimitCorrectorFactors import FatigueLimitCorrectorFactors
 from geometricStressRaiser import GeometricStressRaiser
@@ -13,6 +37,7 @@ class ShaftSection:
         self.d = d
         self.Ra = Ra
         self.material = material
+        # initialize mean and alternating stresses to 0
         self.sigma_m_Mb = 0
         self.sigma_a_Mb = 0
         self.sigma_m_N = 0
@@ -105,3 +130,17 @@ class ShaftSection:
         plt.title("Haigh Diagram @ " + self.name)
         plt.grid()
         plt.show()
+    
+    # Calculate Fatigue Safety Factor
+    def CalculateFatigueSF(self):
+        # Calculate coordinates of specific points
+        coeff1 = np.polyfit(np.array([0, self.material.sigma_y]), np.array([self.sigma_y, 0]), deg=1)
+        coeff2 = np.polyfit(np.array([0, self.material.sigma_u]), np.array([self.material.sigma_Dm1C, 0]), deg=1)
+        inter_x = (coeff2[1] - coeff1[1]) / (coeff1[0] - coeff2[0])
+        inter_y = np.polyval(coeff1, inter_x)
+        coeff3 = np.polyfit(np.array([0, self.material.sigma_m_eq]), np.array([0, self.material.sigma_a_eq]), deg=1)
+        P_x = (coeff2[1] - coeff3[1]) / (coeff3[0] - coeff2[0])
+        if P_x > inter_x:
+            P_x = (coeff1[1] - coeff3[1]) / (coeff3[0] - coeff1[0])
+        P_y = np.polyval(coeff3, P_x)
+        self.fatigueSF = P_y / self.sigma_a_eq
