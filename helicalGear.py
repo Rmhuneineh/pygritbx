@@ -12,7 +12,6 @@ I) Given Properties
 --> 8) "Q_v": transmission accuracy
 --> 9) "FW": tooth face width expressed in [mm]
 --> 10) "material": a Material object representing the material properties of the gear
-Moreover, it can carry out all the necessary calculations
 II) Calculated parameters
 --> 1) "p_n": npmral circular pitch expressed in [mm]
 --> 2) "p_t": transverse circular pitch expressed in [mm]
@@ -63,6 +62,7 @@ IV) Gear tooth verification parameters
 --> 29) "Z_N": stress cycle life factor (wear)
 --> 30) "Z_W": hardness-ratio factor
 --> 31) "wearSF": wear safety factor
+Moreover, it can carry out all the necessary calculations.
 '''
 import numpy as np
 from component import Component
