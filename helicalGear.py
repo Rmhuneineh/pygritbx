@@ -1,5 +1,5 @@
 '''
-This is the HelicalGear class. It inherits from Component class.
+This is the "HelicalGear" class. It inherits from Component class.
 This class is responsible for defining the properties of a HelicalGear object, such as:
 I) Given Properties
 --> 1) "name": a string of characters acting as a label
