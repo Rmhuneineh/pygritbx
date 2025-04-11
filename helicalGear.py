@@ -1,3 +1,69 @@
+'''
+This is the HelicalGear class. It inherits from Component class.
+This class is responsible for defining the properties of a HelicalGear object, such as:
+I) Given Properties
+--> 1) "name": a string of characters acting as a label
+--> 2) "axis": a 3-element vector representing the axis along which the motor is rotating with respect to a defined reference frame
+--> 3) "loc": a 3-element vector representing the location of the motor with respect to a defined reference frame
+--> 4) "m_n": normal module of the gear expressed in [mm]
+--> 5) "z": number of teeth of the gear
+--> 6) "psi": helix angle expressed in [rad]
+--> 7) "phi_n": normal pressure angle expressed in [rad]
+--> 8) "Q_v": transmission accuracy
+--> 9) "FW": tooth face width expressed in [mm]
+--> 10) "material": a Material object representing the material properties of the gear
+Moreover, it can carry out all the necessary calculations
+II) Calculated parameters
+--> 1) "p_n": npmral circular pitch expressed in [mm]
+--> 2) "p_t": transverse circular pitch expressed in [mm]
+--> 3) "p_x": axial pitch expressed in [mm]
+--> 4) "m_t": transverse module expressed in [mm]
+--> 5) "d": pitch diameter expressed in [mm]
+--> 6) "phi_t": transverse pressure angle expressed in [rad]
+--> 7) "z_p": virtual number of teeth
+--> 8) "phi_b": base helix angle expressed in [rad]
+--> 9) "h_a": addendum height expressed in [mm]
+--> 10) "h_f": dedendum height expressed in [mm]
+--> 11) "h": tooth height expressed in [mm]
+--> 12) "d_a": addendum diameter expressed in [mm]
+--> 13) "d_f": dedendum diameter expressed in [mm]
+III) Calculated loads
+--> 1) "F_t": a 3-element vector representing the tangential force expressed in [N]
+--> 2) "F_r": a 3-element vector representing the radial force expressed in [N]
+--> 3) "F_a": a 3-element vector representing the axial force expressed in [N]
+IV) Gear tooth verification parameters
+--> 1) "sigma_max_fatigue": maximum gear tooth bending stress for fatigue expressed in [MPa]
+--> 2) "power_source": a string of characters deining the power source type
+--> 3) "K_0": overload factor
+--> 4) "t_R": difference between dedendum radius and internal gear radius expressed in [mm]
+--> 5) "m_B": ratio between t_R and tooth height
+--> 6) "K_B": rim-thickness factor
+--> 7) "K_v": dynamic factor
+--> 8) "C_mc": coefficient 1 for load distribution factor
+--> 9) "C_pf": coefficient 2 for load distribution factor
+--> 10) "C_pm": coefficient 3 for load distribution factor
+--> 11) "C_ma": coefficient 4 for load distribution factor
+--> 12) "C_e":coefficient 5 for load distribution factor
+--> 13) "Y": coefficient 6 for load distribution factor
+--> 14) "K_H": load distribution factor
+--> 15) "K_S": size factor
+--> 16) "J_p": geometry factor
+--> 17) "J_pp": modifying factor
+--> 18) "Y_J": bending strength geometry factor
+--> 19) "sigma_FP": bending fatigue strength expressed in [MPa]
+--> 20) "Y_N": stress cycle life factor (bending)
+--> 21) "Y_theta": temperature factor
+--> 22) "Y_Z": reliability factor
+--> 23) "bendingSF": bending safety factor
+--> 24) "sigma_max_pitting": maximum gear contact (pitting resistance) stess expressed in [MPa]
+--> 25) "Z_E": elastic coefficient expressed in [MPa^(1/2)]
+--> 26) "Z_I": surface strength geometry
+--> 27) "m_N": load sharing ratio
+--> 28) "sigma_HP": contact strength expressed in [MPa]
+--> 29) "Z_N": stress cycle life factor (wear)
+--> 30) "Z_W": hardness-ratio factor
+--> 31) "wearSF": wear safety factor
+'''
 import numpy as np
 from component import Component
 from force import Force
