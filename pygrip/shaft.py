@@ -34,11 +34,15 @@ class Shaft(Component):
     
     # Update external forces
     def updateEFs(self, EFs):
-        self.EFs = np.append(self.EFs, EFs)
+        for ef in EFs:
+            if ef not in self.EFs:
+                self.EFs = np.append(self.EFs, ef)
     
     # Update external torques
     def updateETs(self, ETs):
-        self.ETs = np.append(self.ETs, ETs)
+        for et in ETs:
+            if et not in self.ETs:
+                self.ETs = np.append(self.ETs, et)
     
     # Set shaft profile
     def setProfile(self, profile):
@@ -61,7 +65,7 @@ class Shaft(Component):
         # Gears axial load
         K_a = np.zeros(3)
         for EF in self.EFs:
-            K_a = K_a + (EF.F * self.axis)
+            K_a = K_a + (EF.force * self.axis)
         # Find the bearing around which to apply moment
         index = 0
         for i in range(len(self.supports)):
@@ -74,15 +78,15 @@ class Shaft(Component):
                 self.supports[i].F_tot = Force(np.zeros(3), self.supports[i].loc)
                 supDist = np.sum(self.supports[i].loc - self.supports[index].loc)
                 for j in range(len(self.EFs)):
-                    momEF = np.cross(self.EFs[j].F, self.EFs[j].loc - self.supports[index].loc) * 1e-3
-                    self.supports[i].F_tot.F = self.supports[i].F_tot.F + np.cross(momEF, np.abs(self.axis) / supDist) * 1e3
+                    momEF = np.cross(self.EFs[j].force, self.EFs[j].loc - self.supports[index].loc) * 1e-3
+                    self.supports[i].F_tot.force = self.supports[i].F_tot.force + np.cross(momEF, np.abs(self.axis) / supDist) * 1e3
                 self.EFs = np.append(self.EFs, self.supports[i].F_tot)
         # Calculate reaction around bearing with sum of external forces
         for i in range(len(self.EFs)):
-            self.supports[index].F_tot.F = self.supports[index].F_tot.F - self.EFs[i].F
+            self.supports[index].F_tot.force = self.supports[index].F_tot.force - self.EFs[i].force
         self.EFs = np.append(self.EFs, self.supports[index].F_tot)
         # Update axial load based on configuration
-        if self.supports[0].bearinType == "Tapered" and self.supports[2].bearingType == "Tapered":
+        if self.supports[0].bearingType == "Tapered" and self.supports[1].bearingType == "Tapered":
             if self.supports[0].shoulder == -1:
                 indA = 1
                 indB = 0
@@ -91,18 +95,18 @@ class Shaft(Component):
                 indA = 0
                 indB = 1
                 sgn = -1
-            A_FrV = self.supports[indA].F_tot.F - self.supports[indA].F_tot.F * self.axis
+            A_FrV = self.supports[indA].F_tot.force - self.supports[indA].F_tot.force * self.axis
             A_Fr = np.sqrt(np.sum(A_FrV * A_FrV))
             A_Y = self.supports[indA].Y
-            B_FrV = self.supports[indB].F_tot.F - self.supports[indB].F_tot.F * self.axis
+            B_FrV = self.supports[indB].F_tot.force - self.supports[indB].F_tot.force * self.axis
             B_Fr = np.sqrt(np.sum(B_FrV * B_FrV))
             B_Y = self.supports[indB].Y
             # Case 1
-            if np.sum(K_a) == 0:
+            if np.sum(K_a) > 0:
                 # Factor of comparison
                 fac = B_Fr / B_Y - A_Fr / A_Y
                 # Case 1a
-                if fac <=0 and np.abs(np.sum(K_a)) >= 0:
+                if fac <= 0 and np.abs(np.sum(K_a)) >= 0:
                     print("Case 1a")
                     A_Fa = sgn * 0.5 * A_Fr / A_Y * self.axis
                     B_Fa = -(A_Fa + K_a)
@@ -119,7 +123,7 @@ class Shaft(Component):
             # Case 2
             else:
                 # Factor of comparison
-                faco = A_Fr / A_Y - B_Fr / B_Y
+                fac = A_Fr / A_Y - B_Fr / B_Y
                 # Case 2a
                 if fac <= 0 and np.abs(np.sum(K_a)) >= 0:
                     print("Case 2a")
@@ -135,19 +139,19 @@ class Shaft(Component):
                     print("Case 2c")
                     A_Fa = sgn * 0.5 * A_Fr / A_Y * self.axis
                     B_Fa = -sgn*(A_Fa + K_a)
-            self.supports[indA].F_tot.F[2] = np.sum(A_Fa)
-            self.supports[indB].F_tot.F[2] = np.sum(B_Fa)
-            if self.supports[i].arr == "B2B":
-                self.EFs[-2].F[2] = np.sum(B_Fa)
-                self.EFs[-1].F[2] = np.sum(A_Fa)
-            elif self.supports[i].arr == "F2F":
-                self.EFs[-2].F[2] = np.sum(A_Fa)
-                self.EFs[-1].F[2] = np.sum(B_Fa)
+            self.supports[indA].F_tot.force[2] = np.sum(A_Fa)
+            self.supports[indB].F_tot.force[2] = np.sum(B_Fa)
+            if self.supports[0].arr == "B2B":
+                self.EFs[-2].force[2] = np.sum(B_Fa)
+                self.EFs[-1].force[2] = np.sum(A_Fa)
+            elif self.supports[0].arr == "F2F":
+                self.EFs[-2].force[2] = np.sum(A_Fa)
+                self.EFs[-1].force[2] = np.sum(B_Fa)
         # Check for equilibrium
         eq = np.zeros(3)
         for EF in self.EFs:
-            eq = eq + EF.F
-        if eq <= 1e-3 * np.ones(3):
+            eq = eq + EF.force
+        if all(eq <= 1e-3 * np.ones(3)):
             print(f"{self.name} is in equilibrium")
         else:
             print(f"{self.name} is NOT in equilibrium")
@@ -163,12 +167,12 @@ class Shaft(Component):
             z = self.profile.locs[i]
             for EF in self.EFs:
                 if np.dot(EF.locs, np.abs(self.axis)) <= z:
-                    self.N[i] = self.N[i] - np.sum(EF.F * np.abs(self.axis))
-                    mxz = np.sum(np.cross(EF.F * RF[2], EF.loc * RF[1]))
-                    mxy = np.sum(np.cross(EF.F * RF[1], (z - EF.loc ) * RF[2]))
+                    self.N[i] = self.N[i] - np.sum(EF.force * np.abs(self.axis))
+                    mxz = np.sum(np.cross(EF.force * RF[2], EF.loc * RF[1]))
+                    mxy = np.sum(np.cross(EF.force * RF[1], (z - EF.loc ) * RF[2]))
                     self.Mx[i] = self.Mx[i] + (mxz - mxy) * 1e-3
-                    myz = np.sum(np.cross(EF.F * RF[2], EF.loc * RF[0]))
-                    myx = np.sum(np.cross(EF.F * RF[0], (EF.loc - z) * RF[2]))
+                    myz = np.sum(np.cross(EF.force * RF[2], EF.loc * RF[0]))
+                    myx = np.sum(np.cross(EF.force * RF[0], (EF.loc - z) * RF[2]))
                     self.My[i] = self.My[i] + (myz + myx) * 1e-3
             for ET in self.ETs:
                 if np.dot(ET.loc, np.abs(self.axis) <= z):

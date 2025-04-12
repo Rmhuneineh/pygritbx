@@ -85,9 +85,9 @@ class Support(Component):
         for support in shaft.supports:
             if self.name == support.name:
                 self.F_tot = support.F_tot
-        F_aV = self.F_tot.F * shaft.axis
+        F_aV = self.F_tot.force * shaft.axis
         self.F_a = np.sqrt(np.sum(F_aV * F_aV))
-        F_rV = self.F_tot.F - self.F_a
+        F_rV = self.F_tot.force - self.F_a
         self.F_r = np.sqrt(np.sum(F_rV * F_rV))
     
     # Minimum load calculation

@@ -129,12 +129,12 @@ class HelicalGear(Component):
     # Calculate Forces
     def calculateForces(self, mesh, shaft):
         if self.name == mesh.drivingGear.name:
-            self.F_t = np.cross(self.T_tot.T, 2 / self.d * mesh.axis) * 1e3
+            self.F_t = np.cross(self.T_tot.torque, 2 / self.d * mesh.axis) * 1e3
             mesh.drivingGear.F_t = self.F_t
             magF_t = sqrt(np.sum(self.F_t * self.F_t))
             self.F_r = -magF_t * tan(self.phi_n) / cos(self.psi) * mesh.axis
             mesh.drivingGear.F_r = self.F_r
-            self.F_a = np.sign(np.sum(shaft.axis)) * np.sin(self.psi) * np.abs(np.cross(mesh.axis, self.F_t * tan(np.abs(self.psi))))
+            self.F_a = np.sign(np.sum(shaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.axis, self.F_t * tan(np.abs(self.psi))))
             mesh.drivingGear.F_a = self.F_a
             Floc = self.d / 2 * np.abs(mesh.axis) + self.loc
             self.F_tot = Force(self.F_t + self.F_r + self.F_a, Floc)
@@ -144,7 +144,7 @@ class HelicalGear(Component):
             self.F_r = -mesh.drivingGear.F_r
             self.F_a = -mesh.drivingGear.F_a
             Floc = -self.d / 2 * np.abs(mesh.axis) + self.loc
-            self.F_tot = Force(-mesh.drivingGear.F_tot.F, Floc)
+            self.F_tot = Force(-mesh.drivingGear.F_tot.force, Floc)
             mesh.drivenGear.F_tot = self.F_tot
     
     # Maximum tooth gear bending stress equation for fatigue

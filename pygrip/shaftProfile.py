@@ -25,12 +25,12 @@ class ShaftProfile:
     
     # Refine Profile
     def refineProfile(self, delta):
-        pLen = (self.locs[-1] - self.locs[0]) / delta + 1
-        refinedProfile = ShaftProfile(np.zeros(pLen), np.arange(self.locs[0], self.locs[-1], delta))
-        for z in range(2, len(self.locs)):
-            condition = np.where(refinedProfile.locs >= self.locs[z]) and np.where(refinedProfile.locs <= self.locs[z + 1])
+        pLen = int((self.locs[-1] - self.locs[0]) / delta + 1)
+        refinedProfile = ShaftProfile(np.zeros(pLen), np.arange(self.locs[0], self.locs[-1] + delta / 2, delta))
+        for z in range(2, len(self.locs) - 1):
+            condition = np.where(np.logical_and(refinedProfile.locs >= self.locs[z], refinedProfile.locs <= self.locs[z + 1]))
             if self.locs[z] != self.locs[z + 1]:
-                refinedProfile.radii[condition] = np.interp(np.array([refinedProfile.locs[condition], self.locs[z], self.locs[z+1]]), np.array([self.radii[z], self.radii[z+1]]))
+                refinedProfile.radii[condition] = np.interp(refinedProfile.locs[condition], np.array([self.locs[z], self.locs[z+1]]), np.array([self.radii[z], self.radii[z+1]]))
         self = refinedProfile
     
     # Calculate Cross-Sectional Properties

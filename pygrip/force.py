@@ -22,3 +22,9 @@ class Force:
     # Overload Negative
     def __neg__(obj):
         return -obj.force
+    
+    # Overload Equal
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return all(self.force == other.force) and all(self.loc == other.loc)
+        return False
