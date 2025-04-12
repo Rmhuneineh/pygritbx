@@ -4,7 +4,7 @@ It contains the data and the necessary calculations via interpolation to get the
 '''
 import numpy as np
 import matplotlib.pyplot as plt
-from makima2dInterpolator import Makima2DInterpolator
+from .makima2dInterpolator import Makima2DInterpolator
 class NotchSensitivity:
     # Notch radius [mm]
     notchRadius = np.arange(0.25, 4.1, 0.25)

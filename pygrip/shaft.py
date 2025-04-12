@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from component import Component
-from torque import Torque
-from force import Force
+from .component import Component
+from .torque import Torque
+from .force import Force
 from math import pi
 class Shaft(Component):
 

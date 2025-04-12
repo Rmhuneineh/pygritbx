@@ -30,7 +30,7 @@ class ShaftProfile:
         for z in range(2, len(self.locs)):
             condition = np.where(refinedProfile.locs >= self.locs[z]) and np.where(refinedProfile.locs <= self.locs[z + 1])
             if self.locs[z] != self.locs[z + 1]:
-                refinedProfile.radii(condition) = np.interp(np.array([refinedProfile.locs[condition], self.locs[z], self.locs[z+1]]), np.array([self.radii[z], self.radii[z+1]]))
+                refinedProfile.radii[condition] = np.interp(np.array([refinedProfile.locs[condition], self.locs[z], self.locs[z+1]]), np.array([self.radii[z], self.radii[z+1]]))
         self = refinedProfile
     
     # Calculate Cross-Sectional Properties

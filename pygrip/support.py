@@ -38,8 +38,8 @@ It defines the properties for SKF bearing supports:
 35) "L_10m": bearing life expressed in [millions of cycles]
 36) "L_10mh": bearing life expressed in [hours]
 '''
-from component import Component
-from force import Force
+from .component import Component
+from .force import Force
 import numpy as np
 class Support(Component):
 

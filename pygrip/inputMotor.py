@@ -14,9 +14,9 @@ II) Calculated properties
 --> 3) "T_tot": the total torque acting on the motor expressed in [Nm] (based on power and speed)
 '''
 import numpy as np
-from component import Component
-from force import Force
-from torque import Torque
+from .component import Component
+from .force import Force
+from .torque import Torque
 from math import pi
 
 class InputMotor(Component):

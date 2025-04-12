@@ -15,7 +15,7 @@ After creating an instance of the class, it's possible to get the rotational vel
 2) GetMeshTorque()
 methods, respectively.
 '''
-from torque import Torque
+from .torque import Torque
 class GearMesh:
 
     # Constructor

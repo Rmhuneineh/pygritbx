@@ -65,10 +65,10 @@ IV) Gear tooth verification parameters
 Moreover, it can carry out all the necessary calculations.
 '''
 import numpy as np
-from component import Component
-from force import Force
+from .component import Component
+from .force import Force
 from math import pi, cos, sin, tan, atan, ceil, sqrt, log
-from makima2dInterpolator import Makima2DInterpolator
+from .makima2dInterpolator import Makima2DInterpolator
 class HelicalGear(Component):
 
     # Overload factor reference matrix
@@ -89,7 +89,7 @@ class HelicalGear(Component):
     Jpp_ref = np.array([[0.927, 0.929, 0.93, 0.932, 0.938, 0.943, 0.953],
                         [0.952, 0.954, 0.957, 0.959, 0.961, 0.965, 0.973],
                         [0.98, 0.981, 0.981, 0.982, 0.983, 0.987, 0.992],
-                        [np.ones(7)],
+                        np.ones(7),
                         [1.02, 1.02, 1.02, 1.019, 1.017, 1.013, 1.01],
                         [1.038, 1.037, 1.035, 1.032, 1.03, 1.026, 1.02]])
     rel_ref = np.array([.9999, .999, .99, .9, .5])

@@ -7,7 +7,7 @@ The properties are:
 3) "Kt_T": torsion geometric stress raiser
 '''
 import numpy as np
-from makima2dInterpolator import Makima2DInterpolator
+from .makima2dInterpolator import Makima2DInterpolator
 import matplotlib.pyplot as plt
 class GeometricStressRaiser():
 

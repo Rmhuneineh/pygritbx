@@ -22,9 +22,9 @@ II) Calculated Properties:
 --> 11) "Kf_N": normal stress concentration factor
 --> 12) "Kf_T": torsion stress concentration factor
 '''
-from notchSensitivity import NotchSensitivity
-from fatigueLimitCorrectorFactors import FatigueLimitCorrectorFactors
-from geometricStressRaiser import GeometricStressRaiser
+from .notchSensitivity import NotchSensitivity
+from .fatigueLimitCorrectorFactors import FatigueLimitCorrectorFactors
+from .geometricStressRaiser import GeometricStressRaiser
 from math import sqrt
 import numpy as np
 import matplotlib.pyplot as plt
