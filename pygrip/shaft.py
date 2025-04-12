@@ -26,7 +26,7 @@ class Shaft(Component):
     
     # Calculate shaft torque
     def getShaftTorque(self):
-        return Torque(-self.inputs.T_tot, self.outpout.loc * np.abs(self.axis))
+        return Torque(-self.input.T_tot, self.outpout.loc * np.abs(self.axis))
     
     # Get shaft rotational speed
     def getOmegaShaft(self):
