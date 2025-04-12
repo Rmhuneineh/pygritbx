@@ -10,7 +10,7 @@ class Shaft(Component):
     def __init__(self, name, inputs, outputs, axis, material, sup1, sup2, ids):
         # Given parameters
         super().__init__(name=name, material=material, axis=axis, loc=None, F_tot=None, T_tot=None, omega=inputs.omega)
-        self.input = inputs
+        self.inputs = inputs
         self.outputs = outputs
         self.supports = np.array([sup1, sup2])
         self.ids = ids
@@ -26,7 +26,7 @@ class Shaft(Component):
     
     # Calculate shaft torque
     def getShaftTorque(self):
-        return Torque(-self.input.T_tot, self.output.loc * np.abs(self.axis))
+        return Torque(-self.inputs.T_tot, self.outputs.loc * np.abs(self.axis))
     
     # Get shaft rotational speed
     def getOmegaShaft(self):
