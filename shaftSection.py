@@ -52,6 +52,8 @@ class ShaftSection:
         self.Kf_N = 1
         self.Kf_B = 1
         self.Kf_T = 1
+        # initialize static safety factor
+        self.staticSF = 0
     
     # Append fatigue stress intensification factor
     def AppendKf(self, Kf, loadType):
