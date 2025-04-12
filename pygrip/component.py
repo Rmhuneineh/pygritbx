@@ -20,3 +20,4 @@ class Component:
         self.loc = loc
         self.F_tot = F_tot
         self.T_tot = T_tot
+        self.omega = omega
