@@ -4,8 +4,8 @@ class ShaftProfile:
 
     # Constructor
     def __init__(self, radii, locs):
-        self.radii = np.array(radii)
-        self.locs = np.array(locs)
+        self.radii = np.concatenate(([0], radii, [0]))
+        self.locs = np.concatenate(([locs[0]], locs, [locs[-1]]))
     
     # Add Fillet
     def AddFillet(self, radius, quadrant, zOff, dOff):

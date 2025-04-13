@@ -45,9 +45,9 @@ class ShaftSection:
         self.tau_m_Mt = 0
         self.tau_a_Mt = 0
         # initialize stress concentration raisers
-        self.Kt_B = None
-        self.Kt_N = None
-        self.Kt_T = None
+        self.Kt_B = 0
+        self.Kt_N = 0
+        self.Kt_T = 0
         # initialize stress concentration factor
         self.Kf_N = 1
         self.Kf_B = 1
@@ -57,27 +57,27 @@ class ShaftSection:
     
     # Append fatigue stress intensification factor
     def AppendKf(self, Kf, loadType):
-        for i in range(len(Kf)):
-            if loadType == "Normal":
-                self.Kf_N = self.Kf_N * Kf[i]
-            elif loadType == "Bending":
-                self.Kf_B = self.Kf_B * Kf[i]
-            elif loadType == "Torsion":
-                self.Kf_T = self.Kf_T * Kf[i]
+        for kf, lt in zip(Kf, loadType):
+            if lt == "Normal":
+                self.Kf_N = self.Kf_N * kf
+            elif lt == "Bending":
+                self.Kf_B = self.Kf_B * kf
+            elif lt == "Torsion":
+                self.Kf_T = self.Kf_T * kf
             else:
-                raise ValueError(f"'{loadType}' is Invalid")
+                raise ValueError(f"'{lt}' is Invalid")
             
     # Calculate fatigue stress intensification factor
     def CalculateFatigueIntensificationFactor(self):
-        self.__class__.AppendKf(1, self.q.qReq*(self.Kt_B - 1), "Bending")
-        self.__class__.AppendKf(1, self.q.qReq*(self.Kt_B - 1), "Normal")
-        self.__class__.AppendKf(1, self.q.qReq*(self.Kt_B - 1), "Torsion")
+        self.__class__.AppendKf(self, [1 + self.q.qReq * (self.Kt_B - 1)], ["Bending"])
+        self.__class__.AppendKf(self, [1 + self.q.qReq * (self.Kt_N - 1)], ["Normal"])
+        self.__class__.AppendKf(self, [1 + self.q.qReq * (self.Kt_T - 1)], ["Torsion"])
 
     # Notch Sensitivity
     def AddNotchSensitivity(self, notchRadius, sigma_u):
         self.q = NotchSensitivity(notchRadius=notchRadius, sigma_u=sigma_u)
         if self.Kt_B == None and self.Kt_N == None and self.Kt_T == None:
-            self._class__.CalculateFatigueIntensificationFactor()
+            self.__class__.CalculateFatigueIntensificationFactor(self)
     
     #Geomtric Stress Raiser
     def AddGeometricStressRaiser(self, r2d, D2d):

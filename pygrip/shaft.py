@@ -166,7 +166,7 @@ class Shaft(Component):
         for i in range(l):
             z = self.profile.locs[i]
             for EF in self.EFs:
-                if np.dot(EF.locs, np.abs(self.axis)) <= z:
+                if np.dot(EF.loc, np.abs(self.axis)) <= z:
                     self.N[i] = self.N[i] - np.sum(EF.force * np.abs(self.axis))
                     mxz = np.sum(np.cross(EF.force * RF[2], EF.loc * RF[1]))
                     mxy = np.sum(np.cross(EF.force * RF[1], (z - EF.loc ) * RF[2]))
@@ -176,7 +176,7 @@ class Shaft(Component):
                     self.My[i] = self.My[i] + (myz + myx) * 1e-3
             for ET in self.ETs:
                 if np.dot(ET.loc, np.abs(self.axis) <= z):
-                    self.Mt[i] = self.Mt[i] + np.sum(ET.T)
+                    self.Mt[i] = self.Mt[i] + np.sum(ET.torque)
         self.N[np.where(self.N < 1e-3)] = 0
         self.Mx[np.where(self.Mx < 1e-3)] = 0
         self.My[np.where(self.My < 1e-3)] = 0
@@ -185,7 +185,7 @@ class Shaft(Component):
     
     # Calculate stresses
     def calculateStresses(self):
-        sLen = len(self.profile.loc)
+        sLen = len(self.profile.locs)
         self.sigma_N = np.zeros(sLen)
         self.sigma_Mb = np.zeros(sLen)
         self.tau_Mt = np.zeros(sLen)
@@ -199,7 +199,7 @@ class Shaft(Component):
         self.sigma_id = np.sqrt(self.sigma_tot ** 2 + 3 * self.tau_Mt ** 2)
     
     # Plot internal loads
-    def plotInternalPlots(self):
+    def plotInternalLoads(self):
         # Normal load
         self.plotLoad(self.N, "N [N]", "Normal Load - N(z)")
         # Bending moment around x-axis
@@ -223,15 +223,15 @@ class Shaft(Component):
         else:
             ax.set_ylim(-1, 1)
         plt.grid()
-        self.profile.plotLoads(ax)
+        self.profile.plotProfile(ax)
         for section in self.sections:
             xs = np.ones(2) * np.sum(section.loc)
             ys = np.array([-1, 1])
             if np.max(np.abs(load)) != 0:
                 ys = ys * 1.1 * np.max(np.abs(load))
             ax.plot(xs, ys, 'g--', linewidth=1.5)
-            plt.text(xs[0] - 10, 0.9 * ys[0], section.name)
-            plt.test(xs[0] - 10, 0.9 * ys[1], section.name)
+            ax.text(xs[0] - 10, 0.9 * ys[0], section.name)
+            ax.text(xs[0] - 10, 0.9 * ys[1], section.name)
     
     # Plot stresses
     def plotStresses(self):
