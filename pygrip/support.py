@@ -209,6 +209,6 @@ class Support(Component):
             raise ValueError("Invalid contamination condition.")
 
     # Calculate bearing life
-    def caculateBearingLife(self):
+    def calculateBearingLife(self):
         self.L_10m = self.a1 * self.a_skf * (self.C / self.P) ** self.p
         self.L_10mh = 1e6 / 60 / np.abs(self.n[np.where(self.n != 0)]) * self.L_10m
