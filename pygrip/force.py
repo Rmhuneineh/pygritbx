@@ -28,3 +28,7 @@ class Force:
         if isinstance(other, self.__class__):
             return all(self.force == other.force) and all(self.loc == other.loc)
         return False
+    
+    # Overload Call
+    def __call__(self):
+        print(f"Force: {self.force}\nLoc: {self.loc}")

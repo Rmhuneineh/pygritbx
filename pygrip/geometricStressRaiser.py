@@ -8,7 +8,6 @@ The properties are:
 '''
 import numpy as np
 from .makima2dInterpolator import Makima2DInterpolator
-from .smooth2dInterpolator import Smooth2DInterpolator
 import matplotlib.pyplot as plt
 class GeometricStressRaiser():
 

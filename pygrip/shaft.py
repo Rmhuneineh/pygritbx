@@ -163,9 +163,8 @@ class Shaft(Component):
         self.Mx = np.zeros(l)
         self.My = np.zeros(l)
         self.Mt = np.zeros(l)
-        for i in range(l):
-            z = self.profile.locs[i]
-            for EF in self.EFs:
+        for EF in self.EFs:
+            for i, z in enumerate(self.profile.locs):
                 if np.dot(EF.loc, np.abs(self.axis)) <= z:
                     self.N[i] = self.N[i] - np.sum(EF.force * np.abs(self.axis))
                     mxz = np.sum(np.cross(EF.force * RF[2], EF.loc * RF[1]))
@@ -174,13 +173,14 @@ class Shaft(Component):
                     myz = np.sum(np.cross(EF.force * RF[2], EF.loc * RF[0]))
                     myx = np.sum(np.cross(EF.force * RF[0], (EF.loc - z) * RF[2]))
                     self.My[i] = self.My[i] + (myz + myx) * 1e-3
-            for ET in self.ETs:
-                if np.dot(ET.loc, np.abs(self.axis) <= z):
-                    self.Mt[i] = self.Mt[i] + np.sum(ET.torque)
-        self.N[np.where(self.N < 1e-3)] = 0
-        self.Mx[np.where(self.Mx < 1e-3)] = 0
-        self.My[np.where(self.My < 1e-3)] = 0
-        self.Mt[np.where(self.Mt < 1e-3)] = 0
+        for ET in self.ETs:
+                for i, z in enumerate(self.profile.locs):
+                    if np.dot(ET.loc, np.abs(self.axis)) <= z:
+                        self.Mt[i] = self.Mt[i] + np.sum(ET.torque)
+        self.N[np.where(np.abs(self.N) < 1e-3)] = 0
+        self.Mx[np.where(np.abs(self.Mx) < 1e-3)] = 0
+        self.My[np.where(np.abs(self.My) < 1e-3)] = 0
+        self.Mt[np.where(np.abs(self.Mt) < 1e-3)] = 0
         self.Mf = np.sqrt(self.Mx ** 2 + self.My ** 2)
     
     # Calculate stresses

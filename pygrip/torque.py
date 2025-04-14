@@ -28,3 +28,7 @@ class Torque:
         if isinstance(other, self.__class__):
             return all(self.torque == other.torque) and all(self.loc == other.loc)
         return False
+    
+    # Overload Call
+    def __call__(self):
+        print(f"Torque: {self.torque}\nLoc: {self.loc}")
