@@ -189,9 +189,9 @@ class Shaft(Component):
         self.sigma_N = np.zeros(sLen)
         self.sigma_Mb = np.zeros(sLen)
         self.tau_Mt = np.zeros(sLen)
-        self.sigma_N[1:-2] = self.N[1:-2] / self.profile.Area[1:-2]
-        self.sigma_Mb[1:-2] = 1e3 * self.Mf[1:-2] / self.profile.Wb[1:-2]
-        self.tau_Mt[1:-2] = 1e3 * self.Mt[1:-2] / self.profile.Wt[1:-2]
+        self.sigma_N[np.where(self.profile.Area != 0)] = self.N[np.where(self.profile.Area != 0)] / self.profile.Area[np.where(self.profile.Area != 0)]
+        self.sigma_Mb[np.where(self.profile.Wb != 0)] = 1e3 * self.Mf[np.where(self.profile.Wb != 0)] / self.profile.Wb[np.where(self.profile.Wb != 0)]
+        self.tau_Mt[np.where(self.profile.Wt != 0)] = 1e3 * self.Mt[np.where(self.profile.Wt != 0)] / self.profile.Wt[np.where(self.profile.Wt != 0)]
     
     # Calculate equivalent and ideal stresses
     def calculateEquivalentAndIdealStress(self):
@@ -269,7 +269,7 @@ class Shaft(Component):
                     sections[i].sigma_m_Mb = 0
                     self.sections[i].sigma_a_Mb = self.sigma_Mb[j]
                     sections[i].sigma_a_Mb = self.sigma_Mb[j]
-                    self.section[i].tau_m_Mt = self.tau_Mt[j]
+                    self.sections[i].tau_m_Mt = self.tau_Mt[j]
                     sections[i].tau_m_Mt = self.tau_Mt[j]
                     self.sections[i].tau_a_Mt = 0
                     sections[i].tau_a_Mt = 0

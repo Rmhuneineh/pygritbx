@@ -100,11 +100,11 @@ class ShaftSection:
     # Plot Haigh Diagram
     def PlotHaighDiagram(self):
         # Calculate coordinates of specific points
-        coeff1 = np.polyfit(np.array([0, self.material.sigma_y]), np.array([self.sigma_y, 0]), deg=1)
+        coeff1 = np.polyfit(np.array([0, self.material.sigma_y]), np.array([self.material.sigma_y, 0]), deg=1)
         coeff2 = np.polyfit(np.array([0, self.material.sigma_u]), np.array([self.material.sigma_Dm1C, 0]), deg=1)
         inter_x = (coeff2[1] - coeff1[1]) / (coeff1[0] - coeff2[0])
         inter_y = np.polyval(coeff1, inter_x)
-        coeff3 = np.polyfit(np.array([0, self.material.sigma_m_eq]), np.array([0, self.material.sigma_a_eq]), deg=1)
+        coeff3 = np.polyfit(np.array([0, self.sigma_m_eq]), np.array([0, self.sigma_a_eq]), deg=1)
         P_x = (coeff2[1] - coeff3[1]) / (coeff3[0] - coeff2[0])
         if P_x > inter_x:
             P_x = (coeff1[1] - coeff3[1]) / (coeff3[0] - coeff1[0])
@@ -113,7 +113,7 @@ class ShaftSection:
         plt.figure
         plt.plot(np.array([0, inter_x, self.material.sigma_y]), np.array([self.material.sigma_Dm1C, inter_y, 0]), 'k', linewidth=1.5)
         plt.plot(self.sigma_m_eq, self.sigma_a_eq, 'm*', linewidth=1.5)
-        plt.plot(np.array([0, inter_x, self.material.sigma_u]), np.array([self.material.sigma_y, inter_y, 0], 'k--', linewidth=1.5))
+        plt.plot(np.array([0, inter_x, self.material.sigma_u]), np.array([self.material.sigma_y, inter_y, 0]), 'k--', linewidth=1.5)
         plt.plot(0, self.material.sigma_Dm1C, "bo", linewidth=1.5)
         plt.plot(0, self.material.sigma_y, "bo", linewidth=1.5)
         plt.plot(self.material.sigma_y, 0, "bo", linewidth=1.5)
@@ -121,12 +121,12 @@ class ShaftSection:
         plt.plot(0, P_y, "bo", linewidth=1.5)
         plt.plot(np.array([0, P_x]), np.array([0, P_y]), "g--", linewidth=1.5)
         plt.plot(np.array([0, P_x]), np.array([P_y, P_y]), "g--", linewidth=1.5)
-        plt.text(self.sigma_m_eq + 5, self.sigma_a_eq - 5, "p" + self.name[1])
+        plt.text(self.sigma_m_eq, self.sigma_a_eq - 35, "P" + self.name[1])
         plt.text(10, self.material.sigma_Dm1C + 15, r"$\sigma_{D-1}^{C}$")
         plt.text(self.material.sigma_y, 20, r"$\sigma_{y}$")
         plt.text(10, self.material.sigma_y + 15, r"$\sigma_{y}$")
         plt.text(self.material.sigma_u, 20, r"$\sigma_{u}$")
-        plt.text(10, P_y - 15, r"$\sigma_{D, lim}")
+        plt.text(10, P_y - 35, r"$\sigma_{D, lim}$")
         plt.xlabel(r"Mean Stress - $\sigma_{m, eq}$ [MPa]")
         plt.ylabel(r"Alternating Stress - $\sigma_{a, eq}$ [MPa]")
         plt.title("Haigh Diagram @ " + self.name)
@@ -136,11 +136,11 @@ class ShaftSection:
     # Calculate Fatigue Safety Factor
     def CalculateFatigueSF(self):
         # Calculate coordinates of specific points
-        coeff1 = np.polyfit(np.array([0, self.material.sigma_y]), np.array([self.sigma_y, 0]), deg=1)
+        coeff1 = np.polyfit(np.array([0, self.material.sigma_y]), np.array([self.material.sigma_y, 0]), deg=1)
         coeff2 = np.polyfit(np.array([0, self.material.sigma_u]), np.array([self.material.sigma_Dm1C, 0]), deg=1)
         inter_x = (coeff2[1] - coeff1[1]) / (coeff1[0] - coeff2[0])
         inter_y = np.polyval(coeff1, inter_x)
-        coeff3 = np.polyfit(np.array([0, self.material.sigma_m_eq]), np.array([0, self.material.sigma_a_eq]), deg=1)
+        coeff3 = np.polyfit(np.array([0, self.sigma_m_eq]), np.array([0, self.sigma_a_eq]), deg=1)
         P_x = (coeff2[1] - coeff3[1]) / (coeff3[0] - coeff2[0])
         if P_x > inter_x:
             P_x = (coeff1[1] - coeff3[1]) / (coeff3[0] - coeff1[0])
