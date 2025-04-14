@@ -74,17 +74,17 @@ class HelicalGear(Component):
     # Overload factor reference matrix
     K0_ref = np.array([[1, 1.25, 1.75], [1.25, 1.5, 2], [1.5, 1.75, 2.25]])
     # Size factor reference graph
-    z_ref = np.concatenate((np.arange(12, 22, 1), np.arange(24, 30, 2), np.array([34, 38, 43, 50, 60, 75, 100, 150, 300, 400])))
-    Y_ref = np.array([[0.245, 0.261, 0.277, 0.29, 0.296, 0.303, 0.309, 0.314, 0.322, 0.328, 0.331, 0.337, 0.346, 0.353, 0.359, 0.371, 0.384, 0.397, 0.409, 0.422, 0.435, 0.447, 0.46, 0.472, 0.48]])
+    z_ref = np.concatenate((np.arange(12, 23, 1), np.arange(24, 31, 2), np.array([34, 38, 43, 50, 60, 75, 100, 150, 300, 400])))
+    Y_ref = np.array([0.245, 0.261, 0.277, 0.29, 0.296, 0.303, 0.309, 0.314, 0.322, 0.328, 0.331, 0.337, 0.346, 0.353, 0.359, 0.371, 0.384, 0.397, 0.409, 0.422, 0.435, 0.447, 0.46, 0.472, 0.48])
     # Bending strength geometry factor reference graphs
-    psi_Jp_ref = np.arange(5, 34, 1)
+    psi_Jp_ref = np.arange(5, 35, 1)
     z_Jp_ref = np.array([20, 30, 60, 150, 500])
     Jp_ref = np.array([[0.465, 0.475, 0.48, 0.487, 0.492, 0.495, 0.497, 0.5, 0.502, 0.505, 0.506, 0.507, 0.508, 0.507, 0.506, 0.505, 0.502, 0.5, 0.497, 0.494, 0.49, 0.486, 0.48, 0.476, 0.471, 0.465, 0.458, 0.452, 0.445, 0.439], 
                        [0.525, 0.53, 0.535, 0.54, 0.542, 0.547, 0.55, 0.552, 0.553, 0.554, 0.555, 0.556, 0.555, 0.554, 0.552, 0.551, 0.549, 0.545, 0.54, 0.537, 0.532, 0.527, 0.52, 0.515, 0.507, 0.5, 0.492, 0.484, 0.476, 0.47], 
                        [0.58, 0.585, 0.595, 0.6, 0.602, 0.605, 0.61, 0.612, 0.614, 0.615, 0.615, 0.615, 0.614, 0.611, 0.608, 0.605, 0.6, 0.595, 0.59, 0.582, 0.577, 0.571, 0.56, 0.555, 0.545, 0.537, 0.527, 0.517, 0.507, 0.495], 
                        [0.62, 0.63, 0.635, 0.64, 0.645, 0.647, 0.652, 0.655, 0.657, 0.657, 0.656, 0.655, 0.654, 0.65, 0.645, 0.64, 0.635, 0.63, 0.622, 0.617, 0.61, 0.6, 0.592, 0.582, 0.575, 0.56, 0.552, 0.541, 0.53, 0.518], 
                        [0.65, 0.655, 0.66, 0.665, 0.67, 0.675, 0.677, 0.68, 0.681, 0.681, 0.681, 0.681, 0.679, 0.676, 0.673, 0.667, 0.66, 0.655, 0.647, 0.64, 0.631, 0.62, 0.613, 0.602, 0.592, 0.58, 0.57, 0.557, 0.545, 0.532]])
-    psi_Jpp_ref = np.arange(5, 35, 5)
+    psi_Jpp_ref = np.arange(5, 36, 5)
     z_Jpp_ref = np.array([20, 30, 50, 75, 150, 500])
     Jpp_ref = np.array([[0.927, 0.929, 0.93, 0.932, 0.938, 0.943, 0.953],
                         [0.952, 0.954, 0.957, 0.959, 0.961, 0.965, 0.973],
@@ -167,7 +167,7 @@ class HelicalGear(Component):
             j = 3
         else:
             raise ValueError("Wrong input for driven machine")
-        self.K_0 = self.__class__.K0_ref[i][j]
+        self.K_0 = self.__class__.K0_ref[i-1][j-1]
         # Rim-thickness factor
         self.t_R = (self.d_f - dShaft) / 2
         self.m_B = self.t_R / self.h
@@ -236,7 +236,12 @@ class HelicalGear(Component):
         self.Y_N = b_YN * N ** e_YN
         if temp <= 120:
             self.Y_theta = 1
-        self.Y_Z = np.interp(rel, self.__class__.rel_ref, self.__class__.YZ_ref)
+        if rel in self.__class__.rel_ref:
+            print("I'm here!")
+            ind = np.where(self.__class__.rel_ref == rel)
+            self.Y_Z = self.__class__.YZ_ref[ind]
+        else:
+            self.Y_Z = np.interp(rel, self.__class__.rel_ref, self.__class__.YZ_ref)
         self.bendingSF = self.sigma_FP * self.Y_N / self.sigma_max_fatigue / self.Y_theta / self.Y_Z
     
     # Calculate sigma max pitting
@@ -270,7 +275,7 @@ class HelicalGear(Component):
             j = 6
         else:
             raise ValueError("Wrong input for gear material.")
-        self.Z_E = self.__class__.ZE_ref[i][j]
+        self.Z_E = self.__class__.ZE_ref[i-1][j-1]
         # Surface strength geometry
         pG = mesh.drivingGear
         gG = mesh.drivenGear
@@ -296,7 +301,7 @@ class HelicalGear(Component):
         if HB_ratio < 1.2:
             A_p = 0
         elif HB_ratio >= 1.2 and HB_ratio <= 1.7:
-            A_p = (8.98 * HB_ratio - 8.29) * 1e3
+            A_p = (8.98 * HB_ratio - 8.29) * 1e-3
         else:
             A_p = 0.00698
         self.Z_W = 1 + A_p * (mesh.m_G - 1)
