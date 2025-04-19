@@ -1,4 +1,4 @@
-# Python-based Gearbox Reliability and Integrity Tool (PyGRIT)
+# Python-based Gearbox Reliability and Integrity Toolbox (PyGRITbx)
 PyGrit is a python-based tool born thanks to a project in the course "Fundamentals of Machine Design" at Politecnico di Torino.
 Students following 3rd year of the Mechanical Engineering bachelor's degree are required to submit a report for this project.
 The tool helps students define the components that constitute the gearbox in the given project, in order to then verify their design.
@@ -47,3 +47,7 @@ II. Bending Stress
 II. Haigh Diagram
 
 ![alt text](Assets/Haigh%20Diagram.png)
+
+## Installation
+For installation, make sure the proper environment is activated and execute the following command in the command line prompt:
+<pre>''' pip install pygritbx </pre>
