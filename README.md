@@ -35,10 +35,10 @@ The user must define the geomtry of the shaf(s) properly so that the tool can ac
 
 ## Examples
 I. Normal Internal Load
-![alt text](image.png)
+![alt text](Assets/Noarmal%20Load.png)
 
 II. Bending Stress
-![alt text](image-1.png)
+![alt text](Assets/Bending%20Stress.png)
 
 II. Haigh Diagram
-![alt text](image-2.png)
+![alt text](Assets/Haigh%20Diagram.png)
