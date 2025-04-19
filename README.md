@@ -32,3 +32,13 @@ The tool supports other classes that the user needs in order to define the inter
 
 The tool accounts for stress concentration factors, notch sensitivity factor, and fatigue limit correction factors to accurately perform the analysis.
 The user must define the geomtry of the shaf(s) properly so that the tool can account for all these factors accurately.
+
+## Examples
+I. Normal Internal Load
+![alt text](image.png)
+
+II. Bending Stress
+![alt text](image-1.png)
+
+II. Haigh Diagram
+![alt text](image-2.png)
