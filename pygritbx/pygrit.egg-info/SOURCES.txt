@@ -1,0 +1,8 @@
+LICENSE
+README.md
+setup.py
+pygrit/pygrit.egg-info/PKG-INFO
+pygrit/pygrit.egg-info/SOURCES.txt
+pygrit/pygrit.egg-info/dependency_links.txt
+pygrit/pygrit.egg-info/requires.txt
+pygrit/pygrit.egg-info/top_level.txt
