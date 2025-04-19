@@ -50,4 +50,4 @@ II. Haigh Diagram
 
 ## Installation
 For installation, make sure the proper environment is activated and execute the following command in the command line prompt:
-<pre>''' pip install pygritbx </pre>
+<pre> pip install pygritbx </pre>
