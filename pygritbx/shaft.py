@@ -205,7 +205,7 @@ class Shaft(Component):
         # Bending moment around x-axis
         self.plotLoad(self.Mx, r"$M_{x}$ [Nm]", r"Bending Moment $M_{x}(z)$")
         # Bending moment around y-axis
-        self.plotLoad(self.My, r"$M_{y}$ [Nm]", r"Bedngin Moment $M_{y}(z)$")
+        self.plotLoad(self.My, r"$M_{y}$ [Nm]", r"Bending Moment $M_{y}(z)$")
         # Resulting bending moment
         self.plotLoad(self.Mf, r"$M_{B}$ [Nm]", r"Bending Moment $M_{B}(z)$")
         # Torsional moment
