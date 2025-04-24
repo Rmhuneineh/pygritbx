@@ -49,7 +49,7 @@ class Support(Component):
 
     # Constructor
     def __init__(self, name, type, bearingType, catalogueName, catalogueType, d, D, B, C, C0, Pu, nr, a, e, X, Y, Y0, Y1, Y2, A, kr, shoulder, arr, loc):
-        super().__init__(name=name, material=None, axis=None, loc=loc, F_tot=Force(np.array([0, 0, 0]), loc=loc), T_tot=None, omega=None)
+        super().__init__(name=name, material=None, axis=None, loc=loc)
         self.type = type
         self.bearingType = bearingType
         self.catalogueName = catalogueName

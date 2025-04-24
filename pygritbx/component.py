@@ -1,3 +1,4 @@
+import numpy as np
 '''
 This is the "Component" class.
 It's a parent class that defines general properties that are common among different components.
@@ -13,11 +14,21 @@ Properties are:
 class Component:
 
     # Constructor
-    def __init__(self, name, material, axis, loc, F_tot, T_tot, omega):
+    def __init__(self, name, material, axis, loc, EFs=np.array([], dtype=object), ETs=np.array([], dtype=object), omega=np.zeros(3)):
         self.name = name
         self.material = material
         self.axis = axis
         self.loc = loc
-        self.F_tot = F_tot
-        self.T_tot = T_tot
+        self.EFs = EFs
+        self.ETs = ETs
         self.omega = omega
+    
+    # Check force equilibrium
+    def checkForceEquilibrium(self):
+        eq = np.zeros(3)
+        for EF in self.EFs:
+            eq = eq + EF.force
+        if all(eq <= 1e-3 * np.ones(3)):
+            print(f"{self.name} is in equilibrium")
+        else:
+            print(f"{self.name} is NOT in equilibrium")

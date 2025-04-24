@@ -5,8 +5,8 @@ from .fatigueLimitCorrectorFactors import FatigueLimitCorrectorFactors
 from .force import Force
 from .gearMesh import GearMesh
 from .geometricStressRaiser import GeometricStressRaiser
-from .helicalGear import HelicalGear
-from .inputMotor import InputMotor
+from .gear import Gear
+from .motor import Motor
 from .makima2dInterpolator import Makima2DInterpolator
 from .material import Material
 from .notchSensitivity import NotchSensitivity

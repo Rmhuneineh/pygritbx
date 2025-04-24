@@ -3,30 +3,34 @@ import matplotlib.pyplot as plt
 from .component import Component
 from .torque import Torque
 from .force import Force
+from .gear import Gear
 from math import pi
 class Shaft(Component):
 
     # Constructor
-    def __init__(self, name, inputs, outputs, axis, material, sup1, sup2, ids):
+    def __init__(self, name, input, outputs, axis, material, sups):
         # Given parameters
-        super().__init__(name=name, material=material, axis=axis, loc=None, F_tot=None, T_tot=None, omega=inputs.omega)
-        self.inputs = inputs
+        super().__init__(name=name, material=material, axis=axis, loc=None, omega=input.omega)
+        self.input = input
         self.outputs = outputs
-        self.supports = np.array([sup1, sup2])
-        self.ids = ids
+        # Update sups speed
+        for sup in sups:
+            sup.omega = self.omega
+            sup.n = sup.omega * 30 / pi
+        self.supports = sups
         # Calculated parameters
         self.outputs.omega = self.omega
         self.sections = np.array([])
-        sup1.omega = self.omega
-        sup1.n = sup1.omega * 30 / pi
-        sup2.omega = self.omega
-        sup2.n = sup2.omega * 30 / pi
-        self.EFs = np.array([])
-        self.ETs = np.array([])
-    
+        # Check instance
+        if isinstance(input, Gear):
+            self.input.onShaft = self
+        for out in outputs:
+            if isinstance(out, Gear):
+                out.onShaft = self
+
     # Calculate shaft torque
     def getShaftTorque(self):
-        return Torque(-self.inputs.T_tot, self.outputs.loc * np.abs(self.axis))
+        return Torque(-self.input.ETs[0], self.outputs.loc * np.abs(self.axis))
     
     # Get shaft rotational speed
     def getOmegaShaft(self):
@@ -147,14 +151,7 @@ class Shaft(Component):
             elif self.supports[0].arr == "F2F":
                 self.EFs[-2].force[2] = np.sum(A_Fa)
                 self.EFs[-1].force[2] = np.sum(B_Fa)
-        # Check for equilibrium
-        eq = np.zeros(3)
-        for EF in self.EFs:
-            eq = eq + EF.force
-        if all(eq <= 1e-3 * np.ones(3)):
-            print(f"{self.name} is in equilibrium")
-        else:
-            print(f"{self.name} is NOT in equilibrium")
+        self.checkForceEquilibrium()
     
     # Calculate internal loads
     def calculateInternalLoads(self, RF):

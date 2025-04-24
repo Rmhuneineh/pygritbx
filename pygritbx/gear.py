@@ -69,7 +69,7 @@ from .component import Component
 from .force import Force
 from math import pi, cos, sin, tan, atan, ceil, sqrt, log
 from .makima2dInterpolator import Makima2DInterpolator
-class HelicalGear(Component):
+class Gear(Component):
 
     # Overload factor reference matrix
     K0_ref = np.array([[1, 1.25, 1.75], [1.25, 1.5, 2], [1.5, 1.75, 2.25]])
@@ -104,7 +104,7 @@ class HelicalGear(Component):
     # Constructor
     def __init__(self, name, axis, loc, m_n, z, psi, phi_n, Q_v, FW, material):
         # Given parameters
-        super().__init__(name=name, material=material, axis=axis, loc=loc, F_tot=None, T_tot=None, omega=None)
+        super().__init__(name=name, material=material, axis=axis, loc=loc)
         self.m_n = m_n
         self.z = z
         self.psi = psi * pi / 180
@@ -125,6 +125,8 @@ class HelicalGear(Component):
         self.h = self.h_a + self.h_f
         self.d_a = self.d + 2 * self.h_a
         self.d_f = self.d - 2 * self.h_f
+        self.onShaft = None
+        self.meshes = np.array([])
     
     # Calculate Forces
     def calculateForces(self, mesh, shaft):
@@ -137,15 +139,12 @@ class HelicalGear(Component):
             self.F_a = np.sign(np.sum(shaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.axis, self.F_t * tan(np.abs(self.psi))))
             mesh.drivingGear.F_a = self.F_a
             Floc = self.d / 2 * np.abs(mesh.axis) + self.loc
-            self.F_tot = Force(self.F_t + self.F_r + self.F_a, Floc)
-            mesh.drivingGear.F_tot = self.F_tot
         else:
             self.F_t = -mesh.drivingGear.F_t
             self.F_r = -mesh.drivingGear.F_r
             self.F_a = -mesh.drivingGear.F_a
             Floc = -self.d / 2 * np.abs(mesh.axis) + self.loc
-            self.F_tot = Force(-mesh.drivingGear.F_tot.force, Floc)
-            mesh.drivenGear.F_tot = self.F_tot
+        self.EFs = np.append(self.EFs, Force(self.F_t + self.F_r + self.F_a, Floc))
     
     # Maximum tooth gear bending stress equation for fatigue
     def calculateSigmaMaxFatigue(self, mesh, powerSource, drivenMachine, dShaft, Ce, teethCond, lShaft, useCond):
