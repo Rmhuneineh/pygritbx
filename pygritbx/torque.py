@@ -4,6 +4,7 @@ It defines a torque vector based on two simple properties:
 1) "torque": a 3-element torque vector representing the torque expressed in [Nm]
 2) "loc": a 3-element vector representing the point of application of the torque expressed in [mm]
 '''
+import numpy as np
 class Torque:
 
     # Constructor
@@ -32,3 +33,8 @@ class Torque:
     # Overload Call
     def __call__(self):
         print(f"Torque: {self.torque}\nLoc: {self.loc}")
+
+    # Calculate Magnitude
+    def mag(self):
+        return np.sqrt(np.sum(self.torque * self.torque))
+

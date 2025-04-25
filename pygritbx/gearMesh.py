@@ -36,7 +36,7 @@ class GearMesh:
         if self.type == "Internal":
             sgn = 1
         self.drivenGear.omega = sgn * self.ratio * self.drivingGear.omega
-        self.drivenGear.T_tot = Torque(-sgn * self.drivingGear.T_tot.torque / self.ratio, self.drivenGear.loc)
+        #self.drivenGear.T_tot = Torque(-sgn * self.drivingGear.T_tot.torque / self.ratio, self.drivenGear.loc)
         self.loc = self.drivingGear.d / 2 * np.abs(self.axis) + self.drivingGear.loc
         self.F = Force(np.zeros(3), self.loc)
         # Update gear meshes

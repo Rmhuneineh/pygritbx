@@ -11,22 +11,24 @@ class Shaft(Component):
     def __init__(self, name, input, outputs, axis, material, sups):
         # Given parameters
         super().__init__(name=name, material=material, axis=axis, loc=None, omega=input.omega)
+        # Input
+        if isinstance(input, Gear):
+            self.input.onShaft = self
         self.input = input
+        # Output
+        for out in outputs:
+            if isinstance(out, Gear):
+                out.onShaft = self
+            out.omega = self.omega
         self.outputs = outputs
-        # Update sups speed
+        # Supports
         for sup in sups:
             sup.omega = self.omega
             sup.n = sup.omega * 30 / pi
         self.supports = sups
-        # Calculated parameters
-        self.outputs.omega = self.omega
+        # Sections
         self.sections = np.array([])
-        # Check instance
-        if isinstance(input, Gear):
-            self.input.onShaft = self
-        for out in outputs:
-            if isinstance(out, Gear):
-                out.onShaft = self
+        
 
     # Calculate shaft torque
     def getShaftTorque(self):

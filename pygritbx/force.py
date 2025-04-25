@@ -4,6 +4,7 @@ It defines a force vector based on two simple properties:
 1) "force": a 3-element force vector representing the force expressed in [N]
 2) "loc": a 3-element vector representing the point of application of the force expressed in [mm]
 '''
+import numpy as np
 class Force:
 
     # Constructor
@@ -32,3 +33,7 @@ class Force:
     # Overload Call
     def __call__(self):
         print(f"Force: {self.force}\nLoc: {self.loc}")
+
+    # Calculate Magnitude
+    def mag(self):
+        return np.sqrt(np.sum(self.force * self.force))

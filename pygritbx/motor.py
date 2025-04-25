@@ -22,12 +22,28 @@ from math import pi
 class Motor(Component):
     
     # Constructor
-    def __init__(self, name, power, n, axis, loc):
+    def __init__(self, name, power=0, n=0, torque=Torque(np.array([]), np.array([])), axis=np.array([0, 0, 0]), loc=np.array([])):
         # Given properties
         super().__init__(name=name, material=None, axis=axis, loc=loc)
+        # Check for valid input
+        if power == 0 and n == 0 and torque.size == 0:
+            raise ValueError("2 out 3 inputs are necessary: power, n, or omega.")
+        # Check which inputs are given
+        if power == 0:
+            omega = n * pi / 30 * self.axis
+            omega_mag = np.sqrt(np.sum(omega * omega))
+            power = torque.mag() * omega_mag
+        elif n == 0:
+            omega = power / torque.mag() * self.axis
+            omega_mag = np.sqrt(np.sum(omega * omega))
+            n = omega_mag * 30 / pi
+        elif torque.torque.size == 0:
+            omega = n * pi / 30
+            torque_mag = power / omega
+            torque = torque_mag * self.axis
+
         self.power = power
         self.n = n
-        # Calculated properties
-        self.omega = self.n * pi / 30 * self.axis
-        self.ETs = np.append(self.ETs, Torque(np.array([0 if o == 0 else self.power/o for o in self.omega]), self.loc))
-        self.EFs = np.append(self.EFs, Force(np.array([0, 0, 0]), self.loc))
+        self.omega = omega
+        self.ETs = np.append(self.ETs, Torque(torque=torque, loc=self.loc))
+        self.EFs = np.append(self.EFs, Force(force=np.array([0, 0, 0]), loc=self.loc))
