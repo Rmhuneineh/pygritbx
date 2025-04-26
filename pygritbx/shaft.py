@@ -4,6 +4,7 @@ from .component import Component
 from .torque import Torque
 from .force import Force
 from .gear import Gear
+from .motor import Motor
 from math import pi
 class Shaft(Component):
 
@@ -15,10 +16,14 @@ class Shaft(Component):
         if isinstance(input, Gear):
             self.input.onShaft = self
         self.input = input
+        if self.input.ETs.size != 0:
+            self.updateETs(input.ETs)
         # Output
         for out in outputs:
             if isinstance(out, Gear):
                 out.onShaft = self
+            if out.ETs.size != 0:
+                self.updateETs(out.ETs)
             out.omega = self.omega
         self.outputs = outputs
         # Supports
@@ -29,7 +34,16 @@ class Shaft(Component):
         # Sections
         self.sections = np.array([])
         
-
+    # Check torque equilibrium
+    def checkTorqueEquilibrium(self):
+        eq = np.zeros(3)
+        for ET in self.ETs:
+            eq = eq + ET.torque
+        if all(eq <= 1e-3 * np.ones(3)):
+            print(f"{self.name} mainatains a torque equilibrium.")
+        else:
+            print(f"{self.name} does not mainatain a torque equilibrium.")
+    
     # Calculate shaft torque
     def getShaftTorque(self):
         return Torque(-self.input.ETs[0], self.outputs.loc * np.abs(self.axis))
@@ -37,18 +51,6 @@ class Shaft(Component):
     # Get shaft rotational speed
     def getOmegaShaft(self):
         return self.omega
-    
-    # Update external forces
-    def updateEFs(self, EFs):
-        for ef in EFs:
-            if ef not in self.EFs:
-                self.EFs = np.append(self.EFs, ef)
-    
-    # Update external torques
-    def updateETs(self, ETs):
-        for et in ETs:
-            if et not in self.ETs:
-                self.ETs = np.append(self.ETs, et)
     
     # Set shaft profile
     def setProfile(self, profile):
