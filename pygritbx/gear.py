@@ -131,20 +131,20 @@ class Gear(Component):
     # Calculate Forces
     def calculateForces(self, mesh, shaft):
         if self.name == mesh.drivingGear.name:
-            self.F_t = np.cross(self.T_tot.torque, 2 / self.d * mesh.axis) * 1e3
-            mesh.drivingGear.F_t = self.F_t
-            magF_t = sqrt(np.sum(self.F_t * self.F_t))
-            self.F_r = -magF_t * tan(self.phi_n) / cos(self.psi) * mesh.axis
-            mesh.drivingGear.F_r = self.F_r
-            self.F_a = np.sign(np.sum(shaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.axis, self.F_t * tan(np.abs(self.psi))))
-            mesh.drivingGear.F_a = self.F_a
+            F_t = np.cross(self.ETs[0].torque, 2 / self.d * mesh.axis) * 1e3
+            mesh.F_t.force = -F_t
+            magF_t = sqrt(np.sum(F_t * F_t))
+            F_r = -magF_t * tan(self.phi_n) / cos(self.psi) * mesh.axis
+            mesh.F_r.force = -F_r
+            F_a = np.sign(np.sum(shaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.axis, F_t * tan(np.abs(self.psi))))
+            mesh.F_a = -F_a
             Floc = self.d / 2 * np.abs(mesh.axis) + self.loc
         else:
-            self.F_t = -mesh.drivingGear.F_t
-            self.F_r = -mesh.drivingGear.F_r
-            self.F_a = -mesh.drivingGear.F_a
+            F_t = mesh.F_t
+            F_r = mesh.F_r
+            F_a = mesh.F_a
             Floc = -self.d / 2 * np.abs(mesh.axis) + self.loc
-        self.EFs = np.append(self.EFs, Force(self.F_t + self.F_r + self.F_a, Floc))
+        self.EFs = np.append(self.EFs, Force(F_t + F_r + F_a, Floc))
     
     # Maximum tooth gear bending stress equation for fatigue
     def calculateSigmaMaxFatigue(self, mesh, powerSource, drivenMachine, dShaft, Ce, teethCond, lShaft, useCond):
