@@ -137,8 +137,9 @@ class Gear(Component):
             F_r = -magF_t * tan(self.phi_n) / cos(self.psi) * mesh.axis
             mesh.F_r.force = -F_r
             F_a = np.sign(np.sum(shaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.axis, F_t * tan(np.abs(self.psi))))
-            mesh.F_a = -F_a
+            mesh.F_a.force = -F_a
             Floc = self.d / 2 * np.abs(mesh.axis) + self.loc
+            mesh.F.force = mesh.F_t.force + mesh.F_r.force + mesh.F_a.force
         else:
             F_t = mesh.F_t
             F_r = mesh.F_r
