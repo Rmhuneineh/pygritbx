@@ -25,16 +25,24 @@ class Component:
     
     # Check force equilibrium
     def checkForceEquilibrium(self):
+        print("Checking force equilibrium.")
         eq = np.zeros(3)
+        eqState = False
         for EF in self.EFs:
             eq = eq + EF.force
         if all(eq <= 1e-3 * np.ones(3)):
             print(f"{self.name} maintains a force equilibrium.")
+            eqState = True
         else:
             print(f"{self.name} does not maintain a force equilibrium.")
-    
+        return eqState
+
     # Check torque equilibrium
     def checkTorqueEquilibrium(self):
+        pass
+
+    # Solve function
+    def solve(self):
         pass
     
     # Update external forces

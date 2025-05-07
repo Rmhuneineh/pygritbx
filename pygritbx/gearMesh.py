@@ -21,10 +21,11 @@ from .force import Force
 class GearMesh:
 
     # Constructor
-    def __init__(self, drivingGear, drivenGear, axis, type):
+    def __init__(self, name, drivingGear, drivenGear, axis, type):
         if drivingGear.m_n != drivenGear.m_n:
             raise Exception("Incompatible Gear Mesh!")
         # Given properties
+        self.name = name
         self.drivingGear = drivingGear
         self.drivenGear = drivenGear
         self.axis = axis

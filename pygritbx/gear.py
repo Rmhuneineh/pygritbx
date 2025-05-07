@@ -67,6 +67,7 @@ Moreover, it can carry out all the necessary calculations.
 import numpy as np
 from .component import Component
 from .force import Force
+from .torque import Torque
 from math import pi, cos, sin, tan, atan, ceil, sqrt, log
 from .makima2dInterpolator import Makima2DInterpolator
 class Gear(Component):
@@ -128,24 +129,85 @@ class Gear(Component):
         self.onShaft = None
         self.meshes = np.array([])
     
-    # Calculate Forces
-    def calculateForces(self, mesh, shaft):
-        if self.name == mesh.drivingGear.name:
-            F_t = np.cross(self.ETs[0].torque, 2 / self.d * mesh.axis) * 1e3
-            mesh.F_t.force = -F_t
-            magF_t = sqrt(np.sum(F_t * F_t))
-            F_r = -magF_t * tan(self.phi_n) / cos(self.psi) * mesh.axis
-            mesh.F_r.force = -F_r
-            F_a = np.sign(np.sum(shaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.axis, F_t * tan(np.abs(self.psi))))
-            mesh.F_a.force = -F_a
-            Floc = self.d / 2 * np.abs(mesh.axis) + self.loc
-            mesh.F.force = mesh.F_t.force + mesh.F_r.force + mesh.F_a.force
+    # Solve function
+    def solve(self):
+        unknown_Ts = 0
+        unknown_Fs = 0
+        unknown_mesh = None
+        if not self.__class__.checkTorqueEquilibrium(self):
+            print(f"Checking solvability for {self.name}.")
+            if self.ETs.size == 0:
+                unknown_Ts += 1
+            for mesh in self.meshes:
+                if all(mesh.F.force == np.zeros(3)):
+                    unknown_Fs += 1
+                    unknown_mesh = mesh
+                else:
+                    if self.name == mesh.drivingGear.name:
+                       sign = -1
+                    else:
+                        sign = 1
+                    self.updateEFs(Force(sign * mesh.F.force, mesh.F.loc))
+            if unknown_Fs + unknown_Ts > 1:
+                print(f"{self.name}'s equilibrium cannot be solved.")
+                return
+            elif unknown_Ts == 1:
+                print(f"Solving torque for {self.name}.")
+                self.__class__.calculateTorque(self)
+                self.onShaft.updateETs([self.ETs[0]])
+            elif unknown_Fs == 1:
+                print(f"Solving force for {self.name} on mesh {unknown_mesh.name}.")
+                self.calculateForces(unknown_mesh)
+            self.checkTorqueEquilibrium()
+            self.checkForceEquilibrium()
         else:
-            F_t = mesh.F_t
-            F_r = mesh.F_r
-            F_a = mesh.F_a
-            Floc = -self.d / 2 * np.abs(mesh.axis) + self.loc
-        self.EFs = np.append(self.EFs, Force(F_t + F_r + F_a, Floc))
+            print(f"Nothing to be solved for {self.name}.")
+    
+    # Check torque equilibrium
+    def checkTorqueEquilibrium(self):
+        print("Checking torque equilibrium.")
+        valid = False
+        if self.EFs.size != 0 or self.ETs.size != 0:
+            valid = True
+        else:
+            return valid
+        eq = np.zeros(3)
+        eqState = False
+        for ET in self.ETs:
+            eq += ET.torque
+        for EF in self.EFs:
+            eq -= np.cross(EF.force, (EF.loc - self.loc) * 1e-3) * self.axis
+        if all(np.abs(eq) <= 1e-3 * np.ones(3)):
+            print(f"{self.name} mainatains a torque equilibrium.")
+            eqState = True
+        else:
+            print(f"{self.name} does not mainatain a torque equilibrium.")
+        return eqState
+
+    # Calculate Torque
+    def calculateTorque(self):
+        ET = Torque(np.zeros(3), self.loc)
+        for EF in self.EFs:
+            ET.torque -= np.cross(EF.force, (EF.loc - self.loc) * 1e-3) * self.axis
+        self.updateETs([ET])
+
+    # Calculate Forces
+    def calculateForces(self, mesh):
+        ET = self.ETs[0].torque
+        for EF in self.EFs:
+            ET -= np.cross(EF.force, (EF.loc - self.loc) * 1e-3) * self.axis
+        sign = 1
+        if self.name == mesh.drivingGear.name:
+            sign = -1
+        F_t = np.cross(ET, 2 / self.d * mesh.axis) * 1e3
+        mesh.F_t.force = sign * F_t
+        magF_t = sqrt(np.sum(F_t * F_t))
+        F_r = sign * magF_t * tan(self.phi_n) / cos(self.psi) * mesh.axis
+        mesh.F_r.force = sign * F_r
+        F_a = np.sign(np.sum(self.onShaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.axis, F_t * tan(np.abs(self.psi))))
+        mesh.F_a.force = -F_a
+        self.updateEFs([Force(F_t + F_r + F_a, mesh.loc)])
+        mesh.F.force = mesh.F_t.force + mesh.F_r.force + mesh.F_a.force
     
     # Maximum tooth gear bending stress equation for fatigue
     def calculateSigmaMaxFatigue(self, mesh, powerSource, drivenMachine, dShaft, Ce, teethCond, lShaft, useCond):
@@ -293,6 +355,7 @@ class Gear(Component):
         else:
             raise ValueError("Gear mesh type invalid.")
         self.sigma_max_pitting = self.Z_E * np.sqrt(np.sum(np.abs(self.F_t)) * self.K_0 * self.K_v * self.K_S * self.K_H * Z_R / self.FW / self.d / self.Z_I)
+    
     # Calculate wear safety factor
     def calculateWearSF(self, sigma_HP, b_ZN, e_ZN, N, mesh):
         self.sigma_HP = sigma_HP

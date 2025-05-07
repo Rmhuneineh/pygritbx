@@ -24,7 +24,7 @@ class Torque:
     def __neg__(obj):
         return -obj.torque
     
-        # Overload Equal
+    # Overload Equal
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return all(self.torque == other.torque) and all(self.loc == other.loc)

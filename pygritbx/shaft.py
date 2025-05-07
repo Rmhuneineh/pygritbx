@@ -39,7 +39,7 @@ class Shaft(Component):
         eq = np.zeros(3)
         for ET in self.ETs:
             eq = eq + ET.torque
-        if all(eq <= 1e-3 * np.ones(3)):
+        if all(np.abs(eq) <= 1e-3 * np.ones(3)):
             print(f"{self.name} mainatains a torque equilibrium.")
         else:
             print(f"{self.name} does not mainatain a torque equilibrium.")
