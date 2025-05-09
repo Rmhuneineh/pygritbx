@@ -131,10 +131,13 @@ class Gear(Component):
     
     # Solve function
     def solve(self):
+        if self.meshes.size == 0:
+            print(f"No meshes on gear {self.name} to solve. Please define configuration properly.")
+            return
         unknown_Ts = 0
         unknown_Fs = 0
         unknown_mesh = None
-        if not self.__class__.checkTorqueEquilibrium(self):
+        if not self.checkTorqueEquilibrium():
             print(f"Checking solvability for {self.name}.")
             if self.ETs.size == 0:
                 unknown_Ts += 1
@@ -147,25 +150,25 @@ class Gear(Component):
                        sign = -1
                     else:
                         sign = 1
-                    self.updateEFs(Force(sign * mesh.F.force, mesh.F.loc))
+                    self.updateEFs([Force(sign * mesh.F.force, mesh.F.loc)])
             if unknown_Fs + unknown_Ts > 1:
                 print(f"{self.name}'s equilibrium cannot be solved.")
                 return
             elif unknown_Ts == 1:
-                print(f"Solving torque for {self.name}.")
-                self.__class__.calculateTorque(self)
-                self.onShaft.updateETs([self.ETs[0]])
+                print(f"Solving torque equilibrium for {self.name}.")
+                self.calculateTorque()
+                self.onShaft.updateETs(self.ETs)
             elif unknown_Fs == 1:
-                print(f"Solving force for {self.name} on mesh {unknown_mesh.name}.")
+                print(f"Solving forces on {self.name} due to mesh {unknown_mesh.name}.")
                 self.calculateForces(unknown_mesh)
-            self.checkTorqueEquilibrium()
-            self.checkForceEquilibrium()
+                self.onShaft.updateEFs(self.EFs)  
+            self.checkTorqueEquilibrium()              
         else:
             print(f"Nothing to be solved for {self.name}.")
     
     # Check torque equilibrium
     def checkTorqueEquilibrium(self):
-        print("Checking torque equilibrium.")
+        print(f"Checking torque equilibrium for {self.name}.")
         valid = False
         if self.EFs.size != 0 or self.ETs.size != 0:
             valid = True
@@ -173,10 +176,11 @@ class Gear(Component):
             return valid
         eq = np.zeros(3)
         eqState = False
+
         for ET in self.ETs:
             eq += ET.torque
         for EF in self.EFs:
-            eq -= np.cross(EF.force, (EF.loc - self.loc) * 1e-3) * self.axis
+            eq += np.cross(EF.force, (EF.loc - self.loc) * 1e-3) * self.axis
         if all(np.abs(eq) <= 1e-3 * np.ones(3)):
             print(f"{self.name} mainatains a torque equilibrium.")
             eqState = True

@@ -25,7 +25,12 @@ class Component:
     
     # Check force equilibrium
     def checkForceEquilibrium(self):
-        print("Checking force equilibrium.")
+        print(f"Checking force equilibrium on {self.name}.")
+        valid = False
+        if self.EFs.size != 0:
+            valid = True
+        else:
+            return valid
         eq = np.zeros(3)
         eqState = False
         for EF in self.EFs:

@@ -9,16 +9,17 @@ from math import pi
 class Shaft(Component):
 
     # Constructor
-    def __init__(self, name, input, outputs, axis, material, sups):
+    def __init__(self, name, inputs, outputs, axis, material, sups):
         # Given parameters
-        super().__init__(name=name, material=material, axis=axis, loc=None, omega=input.omega)
-        # Input
-        if isinstance(input, Gear):
-            self.input.onShaft = self
-        self.input = input
-        if self.input.ETs.size != 0:
-            self.updateETs(input.ETs)
-        # Output
+        super().__init__(name=name, material=material, axis=axis, loc=None, omega=inputs[0].omega)
+        # Inputs
+        for input in inputs:
+            if isinstance(input, Gear):
+                input.onShaft = self
+            if input.ETs.size != 0:
+                self.updateETs(input.ETs)
+        self.inputs = inputs
+        # Outputs
         for out in outputs:
             if isinstance(out, Gear):
                 out.onShaft = self
@@ -26,6 +27,7 @@ class Shaft(Component):
                 self.updateETs(out.ETs)
             out.omega = self.omega
         self.outputs = outputs
+        
         # Supports
         for sup in sups:
             sup.omega = self.omega
@@ -33,20 +35,77 @@ class Shaft(Component):
         self.supports = sups
         # Sections
         self.sections = np.array([])
+    
+    # Solve function
+    def solve(self):
+        unknown_Ts = 0
+        unknkown_Fs = 0
+        unknown_comp_T = None
+        comps = np.append(self.inputs, self.outputs)
+        if not self.checkTorqueEquilibrium():
+            print(f"Checking solvability for {self.name}.")
+            for comp in comps:
+                if comp.ETs.size == 0:
+                    unknown_Ts += 1
+                    unknown_comp_T = comp
+                else:
+                    self.updateETs(comp.ETs)
+                if comp.EFs.size == 0 and not isinstance(comp, Motor):
+                    unknkown_Fs += 1
+                else:
+                    self.updateEFs(comp.EFs)
+            if unknown_Ts > 1:
+                print(f"{self.name}'s torque equilibrium cannot be solved.")
+            elif unknown_Ts == 1:
+                print(f"Solving torque equilibrium for {self.name}.")
+                self.calculateTorque(unknown_comp_T)
+                print(f"Torque equilibrium for {self.name} is solved.")
+                if isinstance(unknown_comp_T, Gear):
+                    choice = input(f"Detected torque on {unknown_comp_T.name}. Would you like to solve its torque equilibrium [y/n]: ")
+                    if choice == 'y' or choice == 'Y':
+                        unknown_comp_T.solve()
+                        unknkown_Fs -= 1
+                    else:
+                        print(f"{unknown_comp_T.name}'s torque equilibrium won't be solved now.")
+        else:
+            print(f"No torque equilibrium to be solved for {self.name}.")
+        if unknkown_Fs == 0:
+            if self.checkForceEquilibrium() :
+                print(f"No force equilibrium to be solved for {self.name}.")
+            else:
+                reaction_choice = input(f"Forces from external components on {self.name} are resolved. Do you want to calculate the reaction forces [y/n]: ")
+                if reaction_choice == 'y' or reaction_choice == 'Y':
+                    self.calculateReactionForces()
+                    self.checkForceEquilibrium()
+                else:
+                    print(f"Reaction forces on {self.name} won't be calculated.")
+        else:
+            print(f"Force equilibrium for {self.name} cannot be solved.")
+            
         
     # Check torque equilibrium
     def checkTorqueEquilibrium(self):
+        print(f"Checking torque equilibrium for {self.name}.")
+        valid = True
+        if self.ETs.size == 0:
+            valid = False
+            return valid
         eq = np.zeros(3)
+        eqState = False
         for ET in self.ETs:
             eq = eq + ET.torque
         if all(np.abs(eq) <= 1e-3 * np.ones(3)):
             print(f"{self.name} mainatains a torque equilibrium.")
+            eqState = True
         else:
             print(f"{self.name} does not mainatain a torque equilibrium.")
+        return eqState
     
-    # Calculate shaft torque
-    def getShaftTorque(self):
-        return Torque(-self.input.ETs[0], self.outputs.loc * np.abs(self.axis))
+    # Calculate torque
+    def calculateTorque(self, comp):
+        ET = Torque(-np.sum(self.ETs), comp.loc)        
+        comp.updateETs([ET])
+        self.updateETs([ET])
     
     # Get shaft rotational speed
     def getOmegaShaft(self):
@@ -92,7 +151,7 @@ class Shaft(Component):
         # Calculate reaction around bearing with sum of external forces
         for i in range(len(self.EFs)):
             self.supports[index].F_tot.force = self.supports[index].F_tot.force - self.EFs[i].force
-        self.EFs = np.append(self.EFs, self.supports[index].F_tot)
+        self.updateEFs([self.supports[index].F_tot])
         # Update axial load based on configuration
         if self.supports[0].bearingType == "Tapered" and self.supports[1].bearingType == "Tapered":
             if self.supports[0].shoulder == -1:
@@ -109,6 +168,7 @@ class Shaft(Component):
             B_FrV = self.supports[indB].F_tot.force - self.supports[indB].F_tot.force * self.axis
             B_Fr = np.sqrt(np.sum(B_FrV * B_FrV))
             B_Y = self.supports[indB].Y
+            print(f"Axial reaction forces on {self.name}: ", end="")
             # Case 1
             if np.sum(K_a) > 0:
                 # Factor of comparison
@@ -155,7 +215,6 @@ class Shaft(Component):
             elif self.supports[0].arr == "F2F":
                 self.EFs[-2].force[2] = np.sum(A_Fa)
                 self.EFs[-1].force[2] = np.sum(B_Fa)
-        self.checkForceEquilibrium()
     
     # Calculate internal loads
     def calculateInternalLoads(self, RF):

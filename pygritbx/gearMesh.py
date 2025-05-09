@@ -38,7 +38,7 @@ class GearMesh:
             sgn = 1
         self.drivenGear.omega = sgn * self.ratio * self.drivingGear.omega
         #self.drivenGear.T_tot = Torque(-sgn * self.drivingGear.T_tot.torque / self.ratio, self.drivenGear.loc)
-        self.loc = self.drivingGear.d / 2 * np.abs(self.axis) + self.drivingGear.loc
+        self.loc = self.drivingGear.d / 2 * self.axis + self.drivingGear.loc
         self.F = Force(np.zeros(3), self.loc) # Resultant Force
         self.F_t = Force(np.zeros(3), self.loc) # Tangential Force
         self.F_r = Force(np.zeros(3), self.loc) # Radial Force
