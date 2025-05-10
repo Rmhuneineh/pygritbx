@@ -24,6 +24,9 @@ class GearMesh:
     def __init__(self, name, drivingGear, drivenGear, axis, type):
         if drivingGear.m_n != drivenGear.m_n:
             raise Exception("Incompatible Gear Mesh!")
+        # Update location of driven gear
+        if drivenGear.abs_loc.size == 0:
+            drivenGear.abs_loc = drivingGear.abs_loc + axis * (drivingGear.d + drivenGear.d) / 2
         # Given properties
         self.name = name
         self.drivingGear = drivingGear
@@ -38,7 +41,7 @@ class GearMesh:
             sgn = 1
         self.drivenGear.omega = sgn * self.ratio * self.drivingGear.omega
         #self.drivenGear.T_tot = Torque(-sgn * self.drivingGear.T_tot.torque / self.ratio, self.drivenGear.loc)
-        self.loc = self.drivingGear.d / 2 * self.axis + self.drivingGear.loc
+        self.loc = self.drivingGear.d / 2 * self.axis + self.drivingGear.abs_loc
         self.F = Force(np.zeros(3), self.loc) # Resultant Force
         self.F_t = Force(np.zeros(3), self.loc) # Tangential Force
         self.F_r = Force(np.zeros(3), self.loc) # Radial Force
@@ -46,11 +49,3 @@ class GearMesh:
         # Update gear meshes
         self.drivingGear.meshes = np.append(self.drivingGear.meshes, self)
         self.drivenGear.meshes = np.append(self.drivenGear.meshes, self)
-    
-    # Get Driven Gear Omega
-    def GetOmegaMesh(self):
-        return self.drivenGear.omega
-    
-    # Get Driven Gear Torque
-    def GetMeshTorque(self):
-        return self.drivenGear.T_tot.torque

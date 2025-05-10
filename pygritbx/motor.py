@@ -22,7 +22,7 @@ from math import pi
 class Motor(Component):
     
     # Constructor
-    def __init__(self, name, power=0, n=0, torque=Torque(np.array([]), np.array([])), axis=np.array([0, 0, 0]), loc=np.array([])):
+    def __init__(self, name, loc, power=0, n=0, torque=Torque(np.array([]), np.array([])), axis=np.array([0, 0, 0])):
         # Given properties
         super().__init__(name=name, material=None, axis=axis, loc=loc)
         # Check for valid input
@@ -45,5 +45,19 @@ class Motor(Component):
         self.power = power
         self.n = n
         self.omega = omega
-        self.ETs = np.append(self.ETs, Torque(torque=torque, loc=self.loc))
-        self.EFs = np.append(self.EFs, Force(force=np.array([0, 0, 0]), loc=self.loc))
+        if self.abs_loc.size != 0:
+            location = self.abs_loc
+        else:
+            location = self.rel_loc
+        self.ETs = np.append(self.ETs, Torque(torque=torque, loc=location))
+        self.EFs = np.append(self.EFs, Force(force=np.array([0, 0, 0]), loc=location))
+    
+    # Update Force Location
+    def updateForceLoc(self):
+        for EF in self.EFs:
+            EF.loc = self.abs_loc
+    
+    # Update Torque Location
+    def updateTorqueLoc(self):
+        for ET in self.ETs:
+            ET.loc = self.abs_loc

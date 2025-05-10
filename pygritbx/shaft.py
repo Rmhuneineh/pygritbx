@@ -9,20 +9,26 @@ from math import pi
 class Shaft(Component):
 
     # Constructor
-    def __init__(self, name, inputs, outputs, axis, material, sups):
+    def __init__(self, name, inputs, outputs, axis, material, sups, loc=0):
         # Given parameters
-        super().__init__(name=name, material=material, axis=axis, loc=None, omega=inputs[0].omega)
+        super().__init__(name=name, material=material, axis=axis, loc=loc, omega=inputs[0].omega)
+        # Update shaft's absolute location
+        if self.abs_loc.size == 0:
+            self.abs_loc = -inputs[0].rel_loc + inputs[0].abs_loc
         # Inputs
         for input in inputs:
-            if isinstance(input, Gear):
-                input.onShaft = self
+            input.onShaft = self
+            input.updateLoc()
+            if isinstance(input, Motor):
+                input.updateForceLoc()
+                input.updateTorqueLoc()
             if input.ETs.size != 0:
                 self.updateETs(input.ETs)
         self.inputs = inputs
         # Outputs
         for out in outputs:
-            if isinstance(out, Gear):
-                out.onShaft = self
+            out.onShaft = self
+            out.updateLoc()
             if out.ETs.size != 0:
                 self.updateETs(out.ETs)
             out.omega = self.omega
@@ -30,6 +36,8 @@ class Shaft(Component):
         
         # Supports
         for sup in sups:
+            sup.onShaft = self
+            sup.updateLoc()
             sup.omega = self.omega
             sup.n = sup.omega * 30 / pi
         self.supports = sups

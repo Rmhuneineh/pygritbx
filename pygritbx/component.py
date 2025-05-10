@@ -18,10 +18,16 @@ class Component:
         self.name = name
         self.material = material
         self.axis = axis
-        self.loc = loc
+        if not isinstance(loc, list):
+            self.rel_loc = loc * self.axis
+            self.abs_loc = np.array([])
+        else:
+            self.rel_loc = np.array([])
+            self.abs_loc = np.array(loc)
         self.EFs = EFs
         self.ETs = ETs
         self.omega = omega
+        self.onShaft = None
     
     # Check force equilibrium
     def checkForceEquilibrium(self):
@@ -61,3 +67,10 @@ class Component:
         for et in ETs:
             if et not in self.ETs:
                 self.ETs = np.append(self.ETs, et)
+    
+    # Update location
+    def updateLoc(self):
+        if self.abs_loc.size == 0:
+            self.abs_loc = self.rel_loc + self.onShaft.abs_loc
+        elif self.rel_loc.size == 0:
+            self.rel_loc = self.abs_loc - self.onShaft.abs_loc

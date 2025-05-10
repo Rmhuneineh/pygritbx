@@ -126,7 +126,6 @@ class Gear(Component):
         self.h = self.h_a + self.h_f
         self.d_a = self.d + 2 * self.h_a
         self.d_f = self.d - 2 * self.h_f
-        self.onShaft = None
         self.meshes = np.array([])
     
     # Solve function

@@ -48,8 +48,8 @@ class Support(Component):
     a1_ref = np.array([1, 0.64, 0.55, 0.47, 0.37, 0.25])
 
     # Constructor
-    def __init__(self, name, type, bearingType, catalogueName, catalogueType, d, D, B, C, C0, Pu, nr, a, e, X, Y, Y0, Y1, Y2, A, kr, shoulder, arr, loc):
-        super().__init__(name=name, material=None, axis=None, loc=loc)
+    def __init__(self, name, type, bearingType, catalogueName, catalogueType, d, D, B, C, C0, Pu, nr, a, e, X, Y, Y0, Y1, Y2, A, kr, shoulder, arr, axis, loc):
+        super().__init__(name=name, material=None, axis=axis, loc=loc)
         self.type = type
         self.bearingType = bearingType
         self.catalogueName = catalogueName
