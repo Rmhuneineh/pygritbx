@@ -111,13 +111,9 @@ class Shaft(Component):
     
     # Calculate torque
     def calculateTorque(self, comp):
-        ET = Torque(-np.sum(self.ETs), comp.loc)        
+        ET = Torque(-np.sum(self.ETs), comp.abs_loc)        
         comp.updateETs([ET])
         self.updateETs([ET])
-    
-    # Get shaft rotational speed
-    def getOmegaShaft(self):
-        return self.omega
     
     # Set shaft profile
     def setProfile(self, profile):
@@ -146,19 +142,20 @@ class Shaft(Component):
         for i in range(len(self.supports)):
             if self.supports[i].type == "Pin":
                 index = i
-                self.supports[index].F_tot = Force(np.zeros(3), self.supports[index].loc * np.abs(self.axis))
+                self.supports[index].F_tot = Force(np.zeros(3), self.supports[index].abs_loc)
         # Calculate reaction on other bearing
         for i in range(len(self.supports)):
             if i != index:
-                self.supports[i].F_tot = Force(np.zeros(3), self.supports[i].loc)
-                supDist = np.sum(self.supports[i].loc - self.supports[index].loc)
-                for j in range(len(self.EFs)):
-                    momEF = np.cross(self.EFs[j].force, self.EFs[j].loc - self.supports[index].loc) * 1e-3
-                    self.supports[i].F_tot.force = self.supports[i].F_tot.force + np.cross(momEF, np.abs(self.axis) / supDist) * 1e3
-                self.EFs = np.append(self.EFs, self.supports[i].F_tot)
+                self.supports[i].F_tot = Force(np.zeros(3), self.supports[i].abs_loc)
+                supDist = self.supports[i].abs_loc - self.supports[index].abs_loc
+                supDist_rec = np.array([1/d if d != 0 else 0 for d in supDist])
+                for EF in self.EFs:
+                    momEF = np.cross(EF.force, (EF.loc - self.supports[index].abs_loc)) * 1e-3
+                    self.supports[i].F_tot.force += np.cross(momEF, supDist_rec) * 1e3
+                self.updateEFs([self.supports[i].F_tot])
         # Calculate reaction around bearing with sum of external forces
-        for i in range(len(self.EFs)):
-            self.supports[index].F_tot.force = self.supports[index].F_tot.force - self.EFs[i].force
+        for EF in self.EFs:
+            self.supports[index].F_tot.force -= EF.force
         self.updateEFs([self.supports[index].F_tot])
         # Update axial load based on configuration
         if self.supports[0].bearingType == "Tapered" and self.supports[1].bearingType == "Tapered":
@@ -223,6 +220,9 @@ class Shaft(Component):
             elif self.supports[0].arr == "F2F":
                 self.EFs[-2].force[2] = np.sum(A_Fa)
                 self.EFs[-1].force[2] = np.sum(B_Fa)
+        # Update support reaction to separate total radial force and axial force
+        for support in self.supports:
+            support.updateReaction()
     
     # Calculate internal loads
     def calculateInternalLoads(self, RF):
@@ -233,7 +233,7 @@ class Shaft(Component):
         self.Mt = np.zeros(l)
         for EF in self.EFs:
             for i, z in enumerate(self.profile.locs):
-                if np.dot(EF.loc, np.abs(self.axis)) <= z:
+                if np.dot(EF.loc - self.abs_loc, np.abs(self.axis)) <= z:
                     self.N[i] = self.N[i] - np.sum(EF.force * np.abs(self.axis))
                     mxz = np.sum(np.cross(EF.force * RF[2], EF.loc * RF[1]))
                     mxy = np.sum(np.cross(EF.force * RF[1], (z - EF.loc ) * RF[2]))
@@ -243,7 +243,7 @@ class Shaft(Component):
                     self.My[i] = self.My[i] + (myz + myx) * 1e-3
         for ET in self.ETs:
                 for i, z in enumerate(self.profile.locs):
-                    if np.dot(ET.loc, np.abs(self.axis)) <= z:
+                    if np.dot(ET.loc - self.abs_loc, np.abs(self.axis)) <= z:
                         self.Mt[i] = self.Mt[i] + np.sum(ET.torque)
         self.N[np.where(np.abs(self.N) < 1e-3)] = 0
         self.Mx[np.where(np.abs(self.Mx) < 1e-3)] = 0

@@ -179,7 +179,7 @@ class Gear(Component):
         for ET in self.ETs:
             eq += ET.torque
         for EF in self.EFs:
-            eq += np.cross(EF.force, (EF.loc - self.loc) * 1e-3) * self.axis
+            eq += np.cross(EF.force, (EF.loc - self.abs_loc) * 1e-3) * np.abs(self.axis)
         if all(np.abs(eq) <= 1e-3 * np.ones(3)):
             print(f"{self.name} mainatains a torque equilibrium.")
             eqState = True
@@ -189,16 +189,16 @@ class Gear(Component):
 
     # Calculate Torque
     def calculateTorque(self):
-        ET = Torque(np.zeros(3), self.loc)
+        ET = Torque(np.zeros(3), self.abs_loc)
         for EF in self.EFs:
-            ET.torque -= np.cross(EF.force, (EF.loc - self.loc) * 1e-3) * self.axis
+            ET.torque -= np.cross(EF.force, (EF.loc - self.abs_loc) * 1e-3) * np.abs(self.axis)
         self.updateETs([ET])
 
     # Calculate Forces
     def calculateForces(self, mesh):
         ET = self.ETs[0].torque
         for EF in self.EFs:
-            ET -= np.cross(EF.force, (EF.loc - self.loc) * 1e-3) * self.axis
+            ET -= np.cross(EF.force, (EF.loc - self.abs_loc) * 1e-3) * np.abs(self.axis)
         sign = 1
         if self.name == mesh.drivingGear.name:
             sign = -1
@@ -259,7 +259,7 @@ class Gear(Component):
             self.C_pf = fw_min / 10 / self.d - 0.0375 + 0.0125 * fw_min / 25.4
         else:
             self.C_pf = fw_min / 10 / self.d - 0.1109 + 0.0207 * fw_min / 25.4 - 0.000228 * (fw_min / 25.4) ** 2
-        S1 = abs(lShaft / 2 - np.sum(np.abs(self.loc)))
+        S1 = abs(lShaft / 2 - np.sum(np.abs(self.rel_loc)))
         if S1 / lShaft < 0.175:
             self.C_pm = 1
         else:
@@ -293,7 +293,7 @@ class Gear(Component):
         interp_func2 = Makima2DInterpolator(self.psi_Jpp_ref, self.z_Jpp_ref, self.Jpp_ref)
         self.J_pp = interp_func2(abs(self.psi * 180 / pi), self.z)
         self.Y_J = self.J_p * self.J_pp
-        self.sigma_max_fatigue = np.sum(np.abs(self.F_t)) * self.K_0 * self.K_B * self.K_v * self.K_H * self.K_S / fw_min / self.m_t / self.Y_J
+        self.sigma_max_fatigue = np.sum(np.abs(mesh.F_t.force)) * self.K_0 * self.K_B * self.K_v * self.K_H * self.K_S / fw_min / self.m_t / self.Y_J
     
     # Calulcate bending safety factor
     def calculateBendingSF(self, sigma_FP, b_YN, e_YN, N, temp, rel):
@@ -301,8 +301,7 @@ class Gear(Component):
         self.Y_N = b_YN * N ** e_YN
         if temp <= 120:
             self.Y_theta = 1
-        if rel in self.__class__.rel_ref:
-            print("I'm here!")
+        if rel in self.__class__.rel_ref:            
             ind = np.where(self.__class__.rel_ref == rel)
             self.Y_Z = self.__class__.YZ_ref[ind]
         else:
@@ -357,7 +356,7 @@ class Gear(Component):
             self.Z_I = cos(self.phi_t) * sin(self.phi_t) * mesh.m_G / 2 / self.m_N / (mesh.m_G - 1)
         else:
             raise ValueError("Gear mesh type invalid.")
-        self.sigma_max_pitting = self.Z_E * np.sqrt(np.sum(np.abs(self.F_t)) * self.K_0 * self.K_v * self.K_S * self.K_H * Z_R / self.FW / self.d / self.Z_I)
+        self.sigma_max_pitting = self.Z_E * np.sqrt(np.sum(np.abs(mesh.F_t.force)) * self.K_0 * self.K_v * self.K_S * self.K_H * Z_R / self.FW / self.d / self.Z_I)
     
     # Calculate wear safety factor
     def calculateWearSF(self, sigma_HP, b_ZN, e_ZN, N, mesh):

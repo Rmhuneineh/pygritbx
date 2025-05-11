@@ -81,11 +81,8 @@ class Support(Component):
         self.a_skf = 0
     
     # Update reaction force
-    def updateReaction(self, shaft):
-        for support in shaft.supports:
-            if self.name == support.name:
-                self.F_tot = support.F_tot
-        F_aV = self.F_tot.force * shaft.axis
+    def updateReaction(self):
+        F_aV = self.F_tot.force * self.axis
         self.F_a = np.sqrt(np.sum(F_aV * F_aV))
         F_rV = self.F_tot.force - self.F_a
         self.F_r = np.sqrt(np.sum(F_rV * F_rV))
@@ -211,4 +208,4 @@ class Support(Component):
     # Calculate bearing life
     def calculateBearingLife(self):
         self.L_10m = self.a1 * self.a_skf * (self.C / self.P) ** self.p
-        self.L_10mh = 1e6 / 60 / np.abs(self.n[np.where(self.n != 0)]) * self.L_10m
+        self.L_10mh = 1e6 / 60 / np.abs(self.n) * self.L_10m
