@@ -95,7 +95,7 @@ class Support(Component):
             elif self.catalogueType == "Explorer":
                 self.Frm = 0.017 * self.C
         elif self.bearingType == "Cylindrical":
-            self.Frm = self.kr * (6 + 4 * max(self.n) / self.nr) * (self.dm / 100) ** 2 * 1e3
+            self.Frm = self.kr * (6 + 4 * abs(self.n) / self.nr) * (self.dm / 100) ** 2 * 1e3
         else:
             raise ValueError("Bearing type not available.")
         if self.F_r != None:
@@ -166,7 +166,7 @@ class Support(Component):
                     self.P0 = self.F_r
             else:
                 raise ValueError("Bearing arrangement not avaialabe.")
-        if self.bearingType == "Cylindrival":
+        if self.bearingType == "Cylindrical":
             self.P0 = self.F_r
         self.s0 = self.C0 / self.P0
     
