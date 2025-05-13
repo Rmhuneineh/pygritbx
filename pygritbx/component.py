@@ -41,7 +41,6 @@ class Component:
         eqState = False
         for EF in self.EFs:
             eq += EF.force
-        print(np.abs(eq))
         if all(np.abs(eq) <= 1e-3 * np.ones(3)):
             print(f"{self.name} maintains a force equilibrium.")
             eqState = True
