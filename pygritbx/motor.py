@@ -49,8 +49,8 @@ class Motor(Component):
             location = self.abs_loc
         else:
             location = self.rel_loc
-        self.ETs = np.append(self.ETs, Torque(torque=torque, loc=location))
-        self.EFs = np.append(self.EFs, Force(force=np.array([0, 0, 0]), loc=location))
+        self.updateETs([Torque(torque=torque, loc=location)])
+        self.updateEFs([Force(force=np.array([0, 0, 0]), loc=location)])
     
     # Update Force Location
     def updateForceLoc(self):
