@@ -16,19 +16,20 @@ Thanks to Python Object-Oriented Programming (POOP), the tool is able to define 
 
 ### Components
 The tool supports the following components:
-1) Input Motor
-2) Helical Gear (can be used as spur gear by settin helix angle to 0)
+1) Motor
+2) Gear (can be used as spur/helical gear by setting the proper helix angle)
 3) Shaft
 4) SKF Bearings
+
 This structure allows the user to define the components based on their given characteristics.
 
 ### Interactions and Geometries
 The tool supports other classes that the user needs in order to define the interactions between different components as well as their geometry:
-1) Mesh: to define the meshing between two gears
-2) Material: to define the material properties for a certain component (yield strength, ultimate tensile strength, etc.)
-3) Force/Torque: to define any external forces or torques acting on a certain component
-4) Shaft Profile: to define the external profile of a shaft component
-5) Shaft Section: to define a section of a shaft whose profile has already been defined to analyze it
+1) Mesh: to define the meshing between two gears.
+2) Material: to define the material properties for a certain component (yield strength, ultimate tensile strength, etc.).
+3) Force/Torque: to define any external forces or torques acting on a certain component.
+4) Shaft Profile: to define the external profile of a shaft component.
+5) Shaft Section: to define a section of a shaft whose profile has already been defined to analyze it.
 
 The tool accounts for stress concentration factors, notch sensitivity factor, and fatigue limit correction factors to accurately perform the analysis.
 The user must define the geomtry of the shaf(s) properly so that the tool can account for all these factors accurately.
