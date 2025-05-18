@@ -32,8 +32,12 @@ class FatigueLimitCorrectorFactors:
                        [0.94, 0.89, 0.85, 0.8, 0.76, 0.72, 0.67, 0.65, 0.61, 0.58, 0.55, 0.52, 0.5, 0.48]])
     # Interpolation Function
     interp_func = RegularGridInterpolator((Ra_ref, sigma_u_ref), Cf_ref)
+    
     # Constructor
-    def __init__(self, section):
+    def __init__(self, section=None):
+        if section == None:
+            raise ValueError("Section cannot be an empty argument.")
+        
         # Cf
         self.Cf_req = self.__class__.interp_func([[section.Ra, section.material.sigma_u]])[0]
         # Cl

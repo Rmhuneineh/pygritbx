@@ -14,7 +14,7 @@ Properties are:
 class Component:
 
     # Constructor
-    def __init__(self, name, material, axis, loc, EFs=np.array([]), ETs=np.array([]), omega=np.zeros(3)):
+    def __init__(self, name="", material=None, axis=np.zeros(3), loc=0, EFs=np.array([]), ETs=np.array([]), omega=np.zeros(3)):
         self.name = name
         self.material = material
         self.axis = axis
@@ -57,13 +57,13 @@ class Component:
         pass
     
     # Update external forces
-    def updateEFs(self, EFs):
+    def updateEFs(self, EFs=[]):
         for ef in EFs:
             if ef not in self.EFs:
                 self.EFs = np.append(self.EFs, ef)
     
     # Update external torques
-    def updateETs(self, ETs):
+    def updateETs(self, ETs=[]):
         for et in ETs:
             if et not in self.ETs:
                 self.ETs = np.append(self.ETs, et)

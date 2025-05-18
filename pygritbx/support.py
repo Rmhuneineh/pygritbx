@@ -173,11 +173,11 @@ class Support(Component):
         self.s0 = self.C0 / self.P0
     
     # Calculate a1
-    def calculateA1(self, rel):
+    def calculateA1(self, rel=1):
         self.a1 = np.interp(rel, self.__class__.rel_ref, self.__class__.a1_ref)
     
     # Calculate contamination factor
-    def calculateEtaC(self, condition):
+    def calculateEtaC(self, condition=""):
         if condition == "Extreme cleanliness":
             self.eta_c = 1
         elif condition == "High cleanliness":

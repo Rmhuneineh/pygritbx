@@ -3,12 +3,12 @@ from math import pi
 class ShaftProfile:
 
     # Constructor
-    def __init__(self, radii, locs):
+    def __init__(self, radii=np.array([]), locs=np.arary([])):
         self.radii = np.concatenate(([0], radii, [0]))
         self.locs = np.concatenate(([locs[0]], locs, [locs[-1]]))
     
     # Add Fillet
-    def AddFillet(self, radius, quadrant, zOff, dOff):
+    def AddFillet(self, radius=0, quadrant=[], zOff=0, dOff=0):
         for q in range(len(quadrant)):
             if quadrant[q] == 1:
                 theta = np.arange(pi, 3*pi/2, 0.1)
@@ -24,7 +24,7 @@ class ShaftProfile:
         self.locs = np.concatenate((self.locs[np.where(before)], z, self.locs[np.where(after)]))
     
     # Refine Profile
-    def refineProfile(self, delta):
+    def refineProfile(self, delta=0.1):
         pLen = int((self.locs[-1] - self.locs[0]) / delta + 1)
         refinedProfile = ShaftProfile(np.zeros(pLen), np.arange(self.locs[0], self.locs[-1] + delta / 2, delta))
         for z in range(2, len(self.locs) - 3):
@@ -40,7 +40,7 @@ class ShaftProfile:
         self.Wt = pi / 2 * self.radii ** 3
     
     # Plot Profile
-    def plotProfile(self, ax):
+    def plotProfile(self, ax=None):
         ax1 = ax.twinx()
         ax1.plot(self.locs, self.radii, 'r', linewidth=1.5)
         ax1.plot(self.locs, -self.radii, 'r', linewidth=1.5)

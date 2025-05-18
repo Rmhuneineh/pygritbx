@@ -9,7 +9,7 @@ from math import pi
 class Shaft(Component):
 
     # Constructor
-    def __init__(self, name, inputs, outputs, axis, material, sups, loc=0):
+    def __init__(self, name="", inputs=[], outputs=[], axis=np.zeros(3), material=None, sups=[], loc=0):
         # Given parameters
         super().__init__(name=name, material=material, axis=axis, loc=loc, omega=inputs[0].omega)
         # Update shaft's absolute location
@@ -110,23 +110,23 @@ class Shaft(Component):
         return eqState
     
     # Calculate torque
-    def calculateTorque(self, comp):
+    def calculateTorque(self, comp=None):
         ET = Torque(-np.sum(self.ETs), comp.abs_loc)        
         comp.updateETs([ET])
         self.updateETs([ET])
     
     # Set shaft profile
-    def setProfile(self, profile):
+    def setProfile(self, profile=None):
         self.profile = profile
     
     # Add sections
-    def addSections(self, sections):
+    def addSections(self, sections=None):
         for section in sections:
             section.material = self.material
         self.sections = np.append(self.sections, sections)
     
     # Insert fatigue limit corrector factors
-    def insertFLCF(self, sections):
+    def insertFLCF(self, sections=None):
         for sec1, sec2 in zip(self.sections, sections):
             sec1.AddFLCF()
             sec2.AddFLCF()
@@ -225,7 +225,7 @@ class Shaft(Component):
             support.updateReaction()
     
     # Calculate internal loads
-    def calculateInternalLoads(self, RF):
+    def calculateInternalLoads(self, RF=None):
         l = len(self.profile.locs)
         self.N = np.zeros(l)
         self.Mx = np.zeros(l)
@@ -280,7 +280,7 @@ class Shaft(Component):
         self.plotLoad(self.Mt, r"$M_{t}$ [Nm]", r"Torsional Moment $M_{t}(z)$")
     
     # Plot load with shaft profile
-    def plotLoad(self, load, ylabel, title):
+    def plotLoad(self, load=[], ylabel="", title=""):
         fig, ax = plt.subplots()
         ax.plot(self.profile.locs, load, 'b', linewidth = 1.5)
         ax.set_xlabel("z [mm]")
@@ -315,7 +315,7 @@ class Shaft(Component):
         self.plotLoad(self.sigma_id, r"$\sigma_{id}$ [MPa]", r"Equivalent Stress - $\sigma_{id}(z)$ [MPa]")
     
     # Calculate sections static safety factor
-    def calculateStaticSafetyFactor(self, sections):
+    def calculateStaticSafetyFactor(self, sections=None):
         for i in range(len(self.sections)):
             zV = np.sum(self.sections[i].loc)
             for j in range(len(self.profile.locs)):
@@ -324,7 +324,7 @@ class Shaft(Component):
             sections[i].staticSF = self.sections[i].staticSF
 
     # Calculate mean and alternating stresses
-    def calculateMeanAlternatingStress(self, sections):
+    def calculateMeanAlternatingStress(self, sections=None):
         for i in range(len(self.sections)):
             zV = np.sum(self.sections[i].loc)
             for j in range(len(self.profile.locs)):
@@ -344,6 +344,6 @@ class Shaft(Component):
             sections[i].staticSF = self.sections[i].staticSF
     
     # Calculate equivalent mean and alternating stress
-    def calculateEquivalentStresses(self, sections):
+    def calculateEquivalentStresses(self, sections=None):
         for section in sections:
             section.CalculateEquivalentStress()

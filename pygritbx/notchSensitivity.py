@@ -19,7 +19,7 @@ class NotchSensitivity:
     interp_func = Makima2DInterpolator(notchRadius, sigma_u, qRef)
     
     # Constructor
-    def __init__(self, notchRadius, sigma_u):
+    def __init__(self, notchRadius=0, sigma_u=0):
         self.qReq = self.__class__.interp_func(notchRadius, sigma_u)
     
     # Plot Reference Notch Sensitivity

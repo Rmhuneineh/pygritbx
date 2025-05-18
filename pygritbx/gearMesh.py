@@ -21,7 +21,9 @@ from .force import Force
 class GearMesh:
 
     # Constructor
-    def __init__(self, name, drivingGear, drivenGear, axis, type):
+    def __init__(self, name="", drivingGear=None, drivenGear=None, axis=np.zeros(3), type=""):
+        if drivingGear == None or drivenGear == None:
+            raise ValueError("Driving or driven gear missing!")
         if drivingGear.m_n != drivenGear.m_n:
             raise Exception("Incompatible Gear Mesh!")
         # Update location of driven gear
@@ -36,9 +38,9 @@ class GearMesh:
         # Calculated properties
         self.ratio = self.drivingGear.z / self.drivenGear.z
         self.m_G = 1 / self.ratio
-        sgn = -1 # aassuming self.type = "External"
-        if self.type == "Internal":
-            sgn = 1
+        sgn = 1 # aassuming self.type = "External"
+        if self.type == "External":
+            sgn = -1
         self.drivenGear.omega = sgn * self.ratio * self.drivingGear.omega
         #self.drivenGear.T_tot = Torque(-sgn * self.drivingGear.T_tot.torque / self.ratio, self.drivenGear.loc)
         self.loc = self.drivingGear.d / 2 * self.axis + self.drivingGear.abs_loc

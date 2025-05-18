@@ -11,7 +11,7 @@ The properties are:
 class Oil:
 
     # Constructor
-    def __init__(self, name, temp, v1, v):
+    def __init__(self, name="", temp=0, v1=0, v=0):
         self.name = name
         self.temperature = temp
         self.v1 = v1
