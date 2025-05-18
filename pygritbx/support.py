@@ -81,6 +81,29 @@ class Support(Component):
         else:
             self.p = 10 / 3
         self.a_skf = 0
+
+    # Life analysis
+    def performLifeAnalysis(self, rel=100, condition="", a_skf=0):
+        self.a_skf = a_skf
+        print(f"Initiating Life Analysis on bearing {self.name}.")
+        print(f"Checking minimum load condition.")
+        if self.calculateMinimumLoad():
+            print(f"Calculating static safety factor.")
+            self.calculateEquivalentStaticLoad()
+            print(f"Bearing {self.name}'s equivalent static load: {self.P0:.2f} [N].")
+            print(f"Bearing {self.name}'s static safety factor: {self.s0:.2f} [-].")
+            print(f"Calculating reliability factor.")
+            self.calculateA1(rel=rel)
+            print(f"Bearing {self.name}'s reliability factor: {self.a1:.2f} [-].")
+            print(f"Calculating equivalent dynamic load.")
+            self.calculateEquivalentDynamicLoad()
+            print(f"Bearing {self.name}'s equivalent dynamic load: {self.P:.2f} [N].")
+            print(f"Calculating contamination factor based on given condition: '{condition}'.")
+            self.calculateEtaC(condition=condition)
+            print(f"Bearing {self.name}'s contamination factor: {self.eta_c:.2f} [-].")
+            print(f"Calculating bearing life.")
+            self.calculateBearingLife()
+            print(f"Bearing {self.name} life analysis results: {self.L_10m:.2f} [million cycles] | {self.L_10mh:.2f} [hours].")
     
     # Update reaction force
     def updateReaction(self):
@@ -99,12 +122,14 @@ class Support(Component):
         elif self.bearingType == "Cylindrical":
             self.Frm = self.kr * (6 + 4 * abs(self.n) / self.nr) * (self.dm / 100) ** 2 * 1e3
         else:
-            raise ValueError("Bearing type not available.")
+            raise ValueError(f"Bearing type '{self.bearingType}' not available.")
         if self.F_r != None:
             if self.F_r >= self.Frm:
-                print(f"{self.name} satisfies minimium load condition.")
+                print(f"Bearing {self.name} satisfies minimium load condition.")
+                return True
             else:
-                print(f"{self.name} does not satisfy minimium load condition.")
+                print(f"Bearing {self.name} does not satisfy minimium load condition.")
+                return False
     
     # Calculate equivalent dynamic load
     def calculateEquivalentDynamicLoad(self):
@@ -173,7 +198,7 @@ class Support(Component):
         self.s0 = self.C0 / self.P0
     
     # Calculate a1
-    def calculateA1(self, rel=1):
+    def calculateA1(self, rel=100):
         self.a1 = np.interp(rel, self.__class__.rel_ref, self.__class__.a1_ref)
     
     # Calculate contamination factor

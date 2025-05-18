@@ -3,7 +3,7 @@ from math import pi
 class ShaftProfile:
 
     # Constructor
-    def __init__(self, radii=np.array([]), locs=np.arary([])):
+    def __init__(self, radii=np.array([]), locs=np.array([])):
         self.radii = np.concatenate(([0], radii, [0]))
         self.locs = np.concatenate(([locs[0]], locs, [locs[-1]]))
     
