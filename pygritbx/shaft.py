@@ -43,6 +43,13 @@ class Shaft(Component):
         self.supports = sups
         # Sections
         self.sections = np.array([])
+        # Profiles
+        self.profiles = np.array([])
+        # Internal Loads
+        self.N = np.array([])
+        self.Mx = np.array([])
+        self.My = np.array([])
+        self.Mt = np.array([])
     
     # Solve function
     def solve(self):
@@ -116,8 +123,11 @@ class Shaft(Component):
         self.updateETs([ET])
     
     # Set shaft profile
-    def setProfile(self, profile=None):
-        self.profile = profile
+    def addProfile(self, profile=None):
+        if profile not in self.profiles:
+            profile.shaft = self
+            profile.calculateSectionProperties()
+            self.profiles = np.append(self.profiles, profile)
     
     # Add sections
     def addSections(self, sections=None):
@@ -126,10 +136,9 @@ class Shaft(Component):
         self.sections = np.append(self.sections, sections)
     
     # Insert fatigue limit corrector factors
-    def insertFLCF(self, sections=None):
-        for sec1, sec2 in zip(self.sections, sections):
-            sec1.AddFLCF()
-            sec2.AddFLCF()
+    def insertFLCF(self):
+        for section in self.sections:
+            section.addFLCF()
     
     # Calculate reaction forces
     def calculateReactionForces(self):
@@ -224,15 +233,74 @@ class Shaft(Component):
         for support in self.supports:
             support.updateReaction()
     
+    # Perform static verification
+    def performStaticVerification(self, RF=None, profile=None):
+        if profile == None:
+            profile = self.profiles[0]
+        print(f"Initiating static verification on shaft {self.name}.")
+        self.calculateInternalLoads(RF=RF, profile=profile)
+        plotInteralLoadsChoice = input(f"Would you like to plot shaft {self.name}'s internal loads? [y/n]: ")
+        if plotInteralLoadsChoice == "Y" or plotInteralLoadsChoice == "y":
+            self.plotInternalLoads(profile=profile)
+        print(f"Calculating stresses on shaft {self.name} along profile '{profile.name}'.")
+        self.calculateStresses(profile=profile)
+        self.calculateEquivalentAndIdealStress(profile=profile)
+        plotStressesChoice = input(f"Woud you like to plot profile '{profile.name}''s stresses? [y/n]: ")
+        if plotStressesChoice == "Y" or plotStressesChoice == "y":
+            profile.plotStresses()
+        print(f"Calculating static safety factor for every user-defined section.")
+        self.calculateStaticSafetyFactor(profile=profile)
+        print(f"Section Name: Static Safety Factor")
+        for section in self.sections:
+            print(f"Section {section.name}: {section.staticSF:.2f} [-].")
+    
+    # Perform fatigue verification
+    def performFatigueVerification(self, RF=None, profile=None):
+        if profile == None:
+            profile = self.profiles[0]
+        print(f"Initiating fatigue verification on shaft {self.name}.")
+        self.calculateInternalLoads(RF=RF, profile=profile)
+        plotInteralLoadsChoice = input(f"Would you like to plot shaft {self.name}'s internal loads? [y/n]: ")
+        if plotInteralLoadsChoice == "Y" or plotInteralLoadsChoice == "y":
+            self.plotInternalLoads(profile=profile)
+        print(f"Calculating stresses on shaft {self.name} along profile '{profile.name}'.")
+        self.calculateStresses(profile=profile)
+        self.calculateEquivalentAndIdealStress(profile=profile)
+        plotStressesChoice = input(f"Woud you like to plot profile '{profile.name}''s stresses? [y/n]: ")
+        if plotStressesChoice == "Y" or plotStressesChoice == "y":
+            profile.plotStresses()
+        print(f"Calculating mean and alternating stresses for every user-defined section.")
+        self.calculateMeanAlternatingStress(profile=profile)
+        print(f"Calculating fatigue limit corrector factors on every user-defined section.")
+        self.insertFLCF()
+        print(f"Calculating equivalent mean and alternating stresses along every user-defined section.")
+        self.calculateEquivalentStresses()
+        plotHaighDiagramChoice = input("Would you like to plot the Haigh Diagram for every defined section? [y/n]:")
+        if plotHaighDiagramChoice == "Y" or plotHaighDiagramChoice == "y":
+            for section in self.sections:
+                section.plotHaighDiagram()
+        print(f"Calculating fatigue safety factor for every user-defined section.")
+        self.calculateFatigueSafetyFactor()
+        print("Section Name: Fatigue Safety Factor")
+        for section in self.sections:
+            print(f"{section.name}: {section.fatigueSF:.2f} [-].")
+        
+    
     # Calculate internal loads
-    def calculateInternalLoads(self, RF=None):
-        l = len(self.profile.locs)
+    def calculateInternalLoads(self, RF=None, profile=None):
+        if profile == None:
+            profile = self.profiles[0]
+        if self.N.size != 0 and self.Mx.size != 0 and self.My.size != 0 and self.Mt.size != 0:
+            print(f"Internal loads for shaft {self.name} already calculated.")
+            return
+        print(f"Calculating internal loads on shaft {self.name}.")
+        l = len(self.profiles[0].locs)
         self.N = np.zeros(l)
         self.Mx = np.zeros(l)
         self.My = np.zeros(l)
         self.Mt = np.zeros(l)
         for EF in self.EFs:
-            for i, z in enumerate(self.profile.locs):
+            for i, z in enumerate(profile.locs):
                 if np.dot(EF.loc - self.abs_loc, np.abs(self.axis)) <= z:
                     self.N[i] = self.N[i] - np.sum(EF.force * np.abs(self.axis))
                     mxz = np.sum(np.cross(EF.force * RF[2], EF.loc * RF[1]))
@@ -242,7 +310,7 @@ class Shaft(Component):
                     myx = np.sum(np.cross(EF.force * RF[0], (EF.loc - z) * RF[2]))
                     self.My[i] = self.My[i] + (myz + myx) * 1e-3
         for ET in self.ETs:
-                for i, z in enumerate(self.profile.locs):
+                for i, z in enumerate(profile.locs):
                     if np.dot(ET.loc - self.abs_loc, np.abs(self.axis)) <= z:
                         self.Mt[i] = self.Mt[i] + np.sum(ET.torque)
         self.N[np.where(np.abs(self.N) < 1e-3)] = 0
@@ -252,37 +320,38 @@ class Shaft(Component):
         self.Mf = np.sqrt(self.Mx ** 2 + self.My ** 2)
     
     # Calculate stresses
-    def calculateStresses(self):
-        sLen = len(self.profile.locs)
-        self.sigma_N = np.zeros(sLen)
-        self.sigma_Mb = np.zeros(sLen)
-        self.tau_Mt = np.zeros(sLen)
-        self.sigma_N[np.where(self.profile.Area != 0)] = self.N[np.where(self.profile.Area != 0)] / self.profile.Area[np.where(self.profile.Area != 0)]
-        self.sigma_Mb[np.where(self.profile.Wb != 0)] = 1e3 * self.Mf[np.where(self.profile.Wb != 0)] / self.profile.Wb[np.where(self.profile.Wb != 0)]
-        self.tau_Mt[np.where(self.profile.Wt != 0)] = 1e3 * self.Mt[np.where(self.profile.Wt != 0)] / self.profile.Wt[np.where(self.profile.Wt != 0)]
+    def calculateStresses(self, profile=None):
+        if profile == None:
+            profile = self.profiles[0]
+        profile.calculateProfileStresses()
     
     # Calculate equivalent and ideal stresses
-    def calculateEquivalentAndIdealStress(self):
-        self.sigma_tot = self.sigma_N + self.sigma_Mb
-        self.sigma_id = np.sqrt(self.sigma_tot ** 2 + 3 * self.tau_Mt ** 2)
+    def calculateEquivalentAndIdealStress(self, profile=None):
+        if profile == None:
+            profile = self.profiles[0]
+        profile.calculateProfileEquivalentAndIdealStress()
     
     # Plot internal loads
-    def plotInternalLoads(self):
+    def plotInternalLoads(self, profile=None):
+        if profile == None:
+            profile = self.profiles[0]
         # Normal load
-        self.plotLoad(self.N, "N [N]", "Normal Load - N(z)")
+        self.plotLoad(load=self.N, ylabel="N [N]", title="Normal Load - N(z)", profile=profile)
         # Bending moment around x-axis
-        self.plotLoad(self.Mx, r"$M_{x}$ [Nm]", r"Bending Moment $M_{x}(z)$")
+        self.plotLoad(load=self.Mx, ylabel=r"$M_{x}$ [Nm]", title=r"Bending Moment $M_{x}(z)$", profile=profile)
         # Bending moment around y-axis
-        self.plotLoad(self.My, r"$M_{y}$ [Nm]", r"Bending Moment $M_{y}(z)$")
+        self.plotLoad(load=self.My, ylabel=r"$M_{y}$ [Nm]", title=r"Bending Moment $M_{y}(z)$", profile=profile)
         # Resulting bending moment
-        self.plotLoad(self.Mf, r"$M_{B}$ [Nm]", r"Bending Moment $M_{B}(z)$")
+        self.plotLoad(load=self.Mf, ylabel=r"$M_{B}$ [Nm]", title=r"Bending Moment $M_{B}(z)$", profile=profile)
         # Torsional moment
-        self.plotLoad(self.Mt, r"$M_{t}$ [Nm]", r"Torsional Moment $M_{t}(z)$")
+        self.plotLoad(load=self.Mt, ylabel=r"$M_{t}$ [Nm]", title=r"Torsional Moment $M_{t}(z)$", profile=profile)
     
     # Plot load with shaft profile
-    def plotLoad(self, load=[], ylabel="", title=""):
+    def plotLoad(self, load=[], ylabel="", title="", profile=None):
+        if profile == None:
+            profile = self.profiles[0]
         fig, ax = plt.subplots()
-        ax.plot(self.profile.locs, load, 'b', linewidth = 1.5)
+        ax.plot(profile.locs, load, 'b', linewidth = 1.5)
         ax.set_xlabel("z [mm]")
         ax.set_ylabel(ylabel)
         plt.title(title)
@@ -291,7 +360,7 @@ class Shaft(Component):
         else:
             ax.set_ylim(-1, 1)
         plt.grid()
-        self.profile.plotProfile(ax)
+        profile.plotProfile(ax)
         for section in self.sections:
             xs = np.ones(2) * np.sum(section.loc)
             ys = np.array([-1, 1])
@@ -300,50 +369,28 @@ class Shaft(Component):
             ax.plot(xs, ys, 'g--', linewidth=1.5)
             ax.text(xs[0] - 10, 0.9 * ys[0], section.name)
             ax.text(xs[0] - 10, 0.9 * ys[1], section.name)
+        plt.show()
     
-    # Plot stresses
-    def plotStresses(self):
-        # Normal stress
-        self.plotLoad(self.sigma_N, r"$\sigma^{N}$ [MPa]", r"Normal Stress - $\sigma^{N}(z)$ [MPa]")
-        # Bending stress
-        self.plotLoad(self.sigma_Mb, r"$\sigma^{M_{B}}$ [MPa]", r"Bending Stress - $\sigma^{M_{B}}(z)$ [MPa]")
-        # Torsional stress
-        self.plotLoad(self.tau_Mt, r"$\tau^{M_{t}}$ [MPa]", r"Torsional Stress - $\tau^{M_{t}}(z)$ [MPa]")
-        # Total stress
-        self.plotLoad(self.sigma_tot, r"$\sigma^{tot}$ [MPa]", r"Resulting Normal Stress - $\sigma^{tot}(z)$ [MPa]")
-        # Equivalent stress
-        self.plotLoad(self.sigma_id, r"$\sigma_{id}$ [MPa]", r"Equivalent Stress - $\sigma_{id}(z)$ [MPa]")
-    
-    # Calculate sections static safety factor
-    def calculateStaticSafetyFactor(self, sections=None):
-        for i in range(len(self.sections)):
-            zV = np.sum(self.sections[i].loc)
-            for j in range(len(self.profile.locs)):
-                if zV >= self.profile.locs[j] and zV < self.profile.locs[j + 1]:
-                    self.sections[i].staticSF = self.material.sigma_y / self.sigma_id[j]
-            sections[i].staticSF = self.sections[i].staticSF
+    # Calculate static safety factor on shaft's sections
+    def calculateStaticSafetyFactor(self, profile=None):
+        if profile == None:
+            profile = self.profiles[0]
+        for section in self.sections:
+            section.calculateSectionStaticSafetyFactor(profile=profile)
 
     # Calculate mean and alternating stresses
-    def calculateMeanAlternatingStress(self, sections=None):
-        for i in range(len(self.sections)):
-            zV = np.sum(self.sections[i].loc)
-            for j in range(len(self.profile.locs)):
-                if zV >= self.profile.locs[j] and zV < self.profile.locs[j + 1]:
-                    self.sections[i].sigma_m_N = self.sigma_N[j]
-                    sections[i].sigma_m_N = self.sigma_N[j]
-                    self.sections[i].sigma_a_N = 0
-                    sections[i].sigma_a_N = 0
-                    self.sections[i].sigma_m_Mb = 0
-                    sections[i].sigma_m_Mb = 0
-                    self.sections[i].sigma_a_Mb = self.sigma_Mb[j]
-                    sections[i].sigma_a_Mb = self.sigma_Mb[j]
-                    self.sections[i].tau_m_Mt = self.tau_Mt[j]
-                    sections[i].tau_m_Mt = self.tau_Mt[j]
-                    self.sections[i].tau_a_Mt = 0
-                    sections[i].tau_a_Mt = 0
-            sections[i].staticSF = self.sections[i].staticSF
+    def calculateMeanAlternatingStress(self, profile=None):
+        if profile == None:
+            profile = self.profiles[0]
+        for section in self.sections:
+            section.calculateSectionMeanAlternatingStress(profile=profile)
     
     # Calculate equivalent mean and alternating stress
-    def calculateEquivalentStresses(self, sections=None):
-        for section in sections:
-            section.CalculateEquivalentStress()
+    def calculateEquivalentStresses(self):
+        for section in self.sections:
+            section.calculateSectionEquivalentStress()
+    
+    # Calculate fatigue safety factor on shaft's sections
+    def calculateFatigueSafetyFactor(self):
+        for section in self.sections:
+            section.calculateSectionFatigueSafetyFactor()
