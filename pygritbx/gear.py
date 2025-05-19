@@ -195,7 +195,7 @@ class Gear(Component):
         self.updateETs([ET])
 
     # Calculate Forces
-    def calculateForces(self, mesh):
+    def calculateForces(self, mesh=None):
         ET = self.ETs[0].torque
         for EF in self.EFs:
             ET -= np.cross(EF.force, (EF.loc - self.abs_loc) * 1e-3) * np.abs(self.axis)
@@ -211,9 +211,21 @@ class Gear(Component):
         mesh.F_a.force = -F_a
         self.updateEFs([Force(F_t + F_r + F_a, mesh.loc)])
         mesh.F.force = mesh.F_t.force + mesh.F_r.force + mesh.F_a.force
+
+    # Perform gear tooth bending analysis
+    def analyseGearToothBending(self, mesh=None, powerSource="", drivenMachine="", dShaft=0, Ce=0, teethCond="", lShaft=0, useCond="",
+                                sigma_FP=0, b_YN=0, e_YN=0, N=0, temp=0, rel=0):
+        print(f"Initiating gear tooth bending analysis for gear {self.name}.")
+        print(f"Calculating maximum gear tooth bending stress for fatigue.")
+        self.calculateSigmaMaxFatigue(mesh=mesh, powerSource=powerSource, drivenMachine=drivenMachine, dShaft=dShaft,
+                                      Ce=Ce, teethCond=teethCond, lShaft=lShaft, useCond=useCond)
+        print(f"Maximum gear tooth bending stress for fatigue for gear {self.name}: {self.sigma_max_fatigue:.2f} [MPa].")
+        print(f"Calculating bending safety factor for gear {self.name}.")
+        self.calculateBendingSF(sigma_FP=sigma_FP, b_YN=b_YN, e_YN=e_YN, N=N, temp=temp, rel=rel)
+        print(f"Gear tooth bending safety factor for gear {self.name}: {self.bendingSF:.2f} [-].")
     
     # Maximum tooth gear bending stress equation for fatigue
-    def calculateSigmaMaxFatigue(self, mesh, powerSource, drivenMachine, dShaft, Ce, teethCond, lShaft, useCond):
+    def calculateSigmaMaxFatigue(self, mesh=None, powerSource="", drivenMachine="", dShaft=0, Ce=0, teethCond="", lShaft=0, useCond=""):
         fw_min = min(mesh.drivingGear.FW, mesh.drivenGear.FW)
         # Overload factor K_0
         if powerSource == "Uniform":
@@ -296,20 +308,30 @@ class Gear(Component):
         self.sigma_max_fatigue = np.sum(np.abs(mesh.F_t.force)) * self.K_0 * self.K_B * self.K_v * self.K_H * self.K_S / fw_min / self.m_t / self.Y_J
     
     # Calulcate bending safety factor
-    def calculateBendingSF(self, sigma_FP, b_YN, e_YN, N, temp, rel):
+    def calculateBendingSF(self, sigma_FP=0, b_YN=0, e_YN=0, N=0, temp=0, rel=0):
         self.sigma_FP = sigma_FP
         self.Y_N = b_YN * N ** e_YN
         if temp <= 120:
             self.Y_theta = 1
         if rel in self.__class__.rel_ref:            
             ind = np.where(self.__class__.rel_ref == rel)
-            self.Y_Z = self.__class__.YZ_ref[ind]
+            self.Y_Z = self.__class__.YZ_ref[ind][0]
         else:
-            self.Y_Z = np.interp(rel, self.__class__.rel_ref, self.__class__.YZ_ref)
+            self.Y_Z = np.interp(rel, self.__class__.rel_ref, self.__class__.YZ_ref)[0]
         self.bendingSF = self.sigma_FP * self.Y_N / self.sigma_max_fatigue / self.Y_theta / self.Y_Z
+
+    # Perform gear tooth pitting analysis
+    def analyseGearToothPitting(self, mesh=None, Z_R=0, sigma_HP=0, b_ZN=0, e_ZN=0, N=0):
+        print(f"Initiating gear tooth pitting analysis for gear {self.name}.")
+        print(f"Calculating maximum gear contact stress.")
+        self.calculateSigmaMaxPitting(mesh=mesh, Z_R=Z_R)
+        print(f"Maximum gear contact stress for gear {self.name}: {self.sigma_max_pitting:.2f} [MPa].")
+        print(f"Calculating wear safety fator for gear {self.name}.")
+        self.calculateWearSF(sigma_HP=sigma_HP, b_ZN=b_ZN, e_ZN=e_ZN, N=N, mesh=mesh)
+        print(f"Wear safety factor for gear {self.name}: {self.wearSF:.2f} [-].")
     
     # Calculate sigma max pitting
-    def calculateSigmaMaxPitting(self, mesh, Z_R):
+    def calculateSigmaMaxPitting(self, mesh=None, Z_R=0):
         # Elastic coefficient
         if mesh.drivingGear.material.name == "Steel":
             i = 1
@@ -359,7 +381,7 @@ class Gear(Component):
         self.sigma_max_pitting = self.Z_E * np.sqrt(np.sum(np.abs(mesh.F_t.force)) * self.K_0 * self.K_v * self.K_S * self.K_H * Z_R / self.FW / self.d / self.Z_I)
     
     # Calculate wear safety factor
-    def calculateWearSF(self, sigma_HP, b_ZN, e_ZN, N, mesh):
+    def calculateWearSF(self, sigma_HP=0, b_ZN=0, e_ZN=0, N=0, mesh=None):
         self.sigma_HP = sigma_HP
         self.Z_N = b_ZN * N ** e_ZN
         HB_ratio = mesh.drivingGear.material.HB / mesh.drivenGear.material.HB
