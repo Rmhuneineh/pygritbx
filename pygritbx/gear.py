@@ -1,19 +1,19 @@
 '''
-This is the "HelicalGear" class. It inherits from Component class.
-This class is responsible for defining the properties of a HelicalGear object, such as:
+This is the "Gear" class. It inherits from "Component" class.
+This class is responsible for defining the properties of a Gear object (spur/helical), such as:
+
 I) Given Properties
 --> 1) "name": a string of characters acting as a label
---> 2) "axis": a 3-element vector representing the axis along which the motor is rotating with respect to a defined reference frame
---> 3) "loc": a 3-element vector representing the location of the motor with respect to a defined reference frame
---> 4) "m_n": normal module of the gear expressed in [mm]
---> 5) "z": number of teeth of the gear
---> 6) "psi": helix angle expressed in [rad]
---> 7) "phi_n": normal pressure angle expressed in [rad]
---> 8) "Q_v": transmission accuracy
---> 9) "FW": tooth face width expressed in [mm]
---> 10) "material": a Material object representing the material properties of the gear
+--> 2) "m_n": normal module of the gear expressed in [mm]
+--> 3) "z": number of teeth of the gear
+--> 4) "psi": helix angle expressed in [rad]
+--> 5) "phi_n": normal pressure angle expressed in [rad]
+--> 6) "Q_v": transmission accuracy
+--> 7) "FW": tooth face width expressed in [mm]
+--> 8) "material": a Material object representing the material properties of the gear
+
 II) Calculated parameters
---> 1) "p_n": npmral circular pitch expressed in [mm]
+--> 1) "p_n": normal circular pitch expressed in [mm]
 --> 2) "p_t": transverse circular pitch expressed in [mm]
 --> 3) "p_x": axial pitch expressed in [mm]
 --> 4) "m_t": transverse module expressed in [mm]
@@ -26,11 +26,8 @@ II) Calculated parameters
 --> 11) "h": tooth height expressed in [mm]
 --> 12) "d_a": addendum diameter expressed in [mm]
 --> 13) "d_f": dedendum diameter expressed in [mm]
-III) Calculated loads
---> 1) "F_t": a 3-element vector representing the tangential force expressed in [N]
---> 2) "F_r": a 3-element vector representing the radial force expressed in [N]
---> 3) "F_a": a 3-element vector representing the axial force expressed in [N]
-IV) Gear tooth verification parameters
+
+III) Gear tooth verification parameters
 --> 1) "sigma_max_fatigue": maximum gear tooth bending stress for fatigue expressed in [MPa]
 --> 2) "power_source": a string of characters deining the power source type
 --> 3) "K_0": overload factor
@@ -62,7 +59,18 @@ IV) Gear tooth verification parameters
 --> 29) "Z_N": stress cycle life factor (wear)
 --> 30) "Z_W": hardness-ratio factor
 --> 31) "wearSF": wear safety factor
-Moreover, it can carry out all the necessary calculations.
+
+Moreover, the user can carry out all the necessary calculations via the following functions:
+--> 1) "solve(self)": implementation of virtual function from parent class resolving the external force(s)/torque(s) acting on the gear.
+--> 2) "checkTorqueEquilibrium(self)": implmenetation of virtual function from parent class to check torque equilibrium on gear by involving external torques and forces, the latter with their corresponding locations with respect to the gear's location.
+--> 3) "calculateTorque(self)": calculates the total external torque on the gear based on sum of moments of all external forces and adds it to "self.ETs".
+--> 4) "calculateForces(self, mesh=None)": calculates the force acting on the gear due to the specific given "mesh" and adds it to "self.EFs". Updates the mesh forces as well.
+--> 5) "analyseGearToothBending(self, mesh=None, powerSource="", drivenMachine="", dShaft=0, Ce=0, teethCond="", lShaft=0, useCond="", sigma_FP=0, b_YN=0, e_YN=0, N=0, temp=0, rel=0)": performs gear tooth bending analysis and produces the maximum gear tooth bending stress express in [MPa] and the gear tooth bending safety factor.
+--> 6) "calculateSigmaMaxFatigue(self, mesh=None, powerSource="", drivenMachine="", dShaft=0, Ce=0, teethCond="", lShaft=0, useCond="")": calculates the maximum gear tooth bending stress expressed in [MPa].
+--> 7) "calculateBendingSF(self, sigma_FP=0, b_YN=0, e_YN=0, N=0, temp=0, rel=0)": calculates the gear tooth bending safety factor.
+--> 8) "analyseGearToothPitting(self, mesh=None, Z_R=0, sigma_HP=0, b_ZN=0, e_ZN=0, N=0)": perform gear tooth pitting analysis and produces the maximum gear tooth contact stress expressed in [MPa] and the wear safety factor.
+--> 9) "calculateSigmaMaxPitting(self, mesh=None, Z_R=0)": calculates the maximum gear tooth contact stress expressed in [MPa].
+--> 10) "calculateWearSF(self, sigma_HP=0, b_ZN=0, e_ZN=0, N=0, mesh=None)": calculates the wear safety factor.
 '''
 import numpy as np
 from .component import Component

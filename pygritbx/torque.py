@@ -1,8 +1,9 @@
 '''
 This is the "Torque" class.
+
 It defines a torque vector based on two simple properties:
-1) "torque": a 3-element torque vector representing the torque expressed in [Nm]
-2) "loc": a 3-element vector representing the point of application of the torque expressed in [mm]
+--> 1) "torque": a 3-element torque vector representing the torque expressed in [Nm]
+--> 2) "loc":  a scalar or 3-element vector representing the point of application of the torque expressed in [mm]
 '''
 import numpy as np
 class Torque:

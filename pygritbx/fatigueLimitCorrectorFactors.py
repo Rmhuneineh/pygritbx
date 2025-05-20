@@ -1,5 +1,5 @@
 '''
-This is the FatigueLimitCorrectorFactors class.
+This is the "Fatigue Limit Corrector Factors" class.
 It contains the data and the necessary calculations via interpolation to get the final factor.
 The properties are:
 1) "Cs": size factor

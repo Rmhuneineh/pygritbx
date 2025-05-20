@@ -1,17 +1,18 @@
 '''
-This is the "InputMotor" class. It inherits from "Component" class.
-The input motor class defines the properties of an electric motor based on:
+This is the "Motor" class. It inherits from "Component" class.
+The motor class defines the properties of an electric motor based on:
+
 I) Given properties:
 --> 1) "name": a string of characters acting as a label
---> 2) "material": a "Material" object of the material class defining the material properties of the component
---> 3) "axis": a 3-element vector representing the axis along which the motor is rotating with respect to a defined reference frame
---> 4) "loc": a 3-element vector representing the location of the motor with respect to a defined reference frame
---> 5) "power": scalar value representing the power of the motor expressed in [W]
---> 6) "n": scalar value representing the speed expressed in [rpm]
+--> 2) "power": scalar value representing the power of the motor expressed in [W]
+--> 3) "n": scalar value representing the speed expressed in [rpm]
+--> 4) "torque": a 3-element vector representing the torque exerted by the motor expressed in [Nm]
+ For properties (2), (3), and (4), the user can indicate either 2 of them (the 3rd will be calculated) or all of them where a check will be performed.
+
 II) Calculated properties
---> 1) "omega": a 3-vector element representing the rotational velocity of the vector expressed in [rad/s]
---> 2) "F_tot": the total force acting on the motor expressed in [N] (initialized to 0)
---> 3) "T_tot": the total torque acting on the motor expressed in [Nm] (based on power and speed)
+--> 1) "omega": a 3-element vector representing the rotational velocity of the motor expressed in [rad/s]
+
+The functions implemented help relocate the load(s) exerted by the motor once placed on a shaft.
 '''
 import numpy as np
 from .component import Component
@@ -27,7 +28,12 @@ class Motor(Component):
         super().__init__(name=name, material=None, axis=axis, loc=loc)
         # Check for valid input
         if power == 0 and n == 0 and torque.size == 0:
-            raise ValueError("2 out 3 inputs are necessary: power, n, or omega.")
+            raise ValueError("A minimum of 2 out of 3 inputs are necessary: power, n, and torque.")
+        elif power != 0 and n != 0 and torque.size != 0:
+            omega = n * pi / 30 * self.axis
+            omega_mag = np.sqrt(np.sum(omega * omega))
+            if power != torque.mag() * omega_mag:
+                raise ValueError(f"Provided given is incoherent: {power} != {torque.mag() * omega_mag}.")
         # Check which inputs are given
         if power == 0:
             omega = n * pi / 30 * self.axis

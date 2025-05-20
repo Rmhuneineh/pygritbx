@@ -1,42 +1,57 @@
 '''
 This is the "Support" class. It inherits "Component" class.
+
 It defines the properties for SKF bearing supports:
-1) "name": a string of characters acting as a label
-2) "type": "Pin" / "Roller"
-3) "catalogueName": name of bearing as specified in catalogue
-4) "catalogueType": "Standard" / "Explorer"
-5) "d": bearing internal diamater expressed in [mm]
-6) "D": bearing external diameter expressed in [mm]
-7) "dm": bearing mean diameter expressed in [mm]
-8) "B": bearing width expressed in [mm]
-9) "C": dynamic basic load rating expressed in [N]
-10) "C0": static basic load rating expressed in [N]
-11) "Pu": fatigue load limit expressed in [N]
-12) "a": bearing pressure point offset expressed in [mm]
-13) "e": calculation factor 1
-14) "X": bearing radial load factor
-15) "Y": bearing axial load factor
-16) "Y0": calculation factor 2
-17) "Y1": calculation factor 3
-18) "Y2": calculation factor 4
-19) "A": bearing calculation factor 1
-20) "kr": minimium load factor
-21) "shoulder": "1" for +ve offser / "-1" for negative offset
-22) "Frm": minimium load expressed in [N]
-23) "P": equivalent dynamic bearing load expressed in [N]
-24) "P0": equivalent static bearing load expressed in [N]
-25) "F_a": axial reaction force expressed in [N]
-26) "F_r" radial reaction force expressed in [N]
-27) "arr": "Single" / "F2F" / "B2B" / "Tandem" / "Double row"
-28) "n": rotational speed expressed in [rpm]
-29) "nr": reference speed expressed in [rpm]
-30) "s0": safety factor for static bearing load
-31) "p": exponent for life equation
-32) "a1": reliability factor
-33) "eta_c": contamination factor
-34) "a_skf": lubrication, contamination, and fatigue limit factor
-35) "L_10m": bearing life expressed in [millions of cycles]
-36) "L_10mh": bearing life expressed in [hours]
+I) Given properties
+--> 1) "type": "Pin" / "Roller"
+--> 2) "catalogueName": name of bearing as specified in catalogue
+--> 3) "catalogueType": "Standard" / "Explorer"
+--> 4) "d": bearing internal diamater expressed in [mm]
+--> 5) "D": bearing external diameter expressed in [mm]
+--> 6) "dm": bearing mean diameter expressed in [mm]
+--> 7) "B": bearing width expressed in [mm]
+--> 8) "C": dynamic basic load rating expressed in [N]
+--> 9) "C0": static basic load rating expressed in [N]
+--> 10) "Pu": fatigue load limit expressed in [N]
+--> 11) "a": bearing pressure point offset expressed in [mm]
+--> 12) "e": calculation factor 1
+--> 13) "X": bearing radial load factor
+--> 14) "Y": bearing axial load factor
+--> 15) "Y0": calculation factor 2
+--> 16) "Y1": calculation factor 3
+--> 17) "Y2": calculation factor 4
+--> 18) "A": bearing calculation factor 1
+--> 19) "kr": minimium load factor
+--> 20) "shoulder": "1" for +ve offser / "-1" for negative offset
+--> 21) "F_a": axial reaction force expressed in [N]
+--> 22) "F_r" radial reaction force expressed in [N]
+--> 23) "arr": "Single" / "F2F" / "B2B" / "Tandem" / "Double row"
+--> 24) "n": rotational speed expressed in [rpm]
+--> 25) "nr": reference speed expressed in [rpm]
+--> 26) "p": exponent for life equation
+--> 27) "a_skf": lubrication, contamination, and fatigue limit factor
+
+II) Calculated properties:
+--> 1) "F_a": a 3-element vector representing the axial force exerted by the bearing expressed in [N]
+--> 2) "F_r": a 3-element vector representing the resultant radial force exerted by the bearing expressed in [N]
+--> 3) "F_rm": a scalar representing the minimium resultant radial load the bearing must sustain under operation expressed in [N]
+--> 4) "P": bearing equivalent dynamic load expressed in [N]
+--> 5) "P0": equivalent static bearing load expressed in [N]
+--> 6) "s0": safety factor for static bearing load
+--> 7) "a1": reliability factor
+--> 8) "eta_c": contamination factor
+--> 9) "L_10m": bearing life expressed in [millions of cycles]
+--> 10) "L_10mh": bearing life expressed in [hours]
+
+The properties can be manipulated or used via the following functions:
+--> 1) "performLifeAnalysis(self, rel=100, condition="", a_skf=0)": performs life analysis on the bearing.
+--> 2) "updateReaction(self)": resolves the radial and axial forces acting on the bearing by referring to the resultant force.
+--> 3) "calculateMinimumLoad(self)": calculates the minimum required radial load of the bearing.
+--> 4) "calculateEquivalentDynamicLoad(self)": calculates the equivalent dynamic load of the bearing.
+--> 5) "calculateEquivalentStaticLoad(self)": calculates the equivalent static load of the bearing and the safety factor for static bearing load.
+--> 6) "calculateA1(self, rel=100)": calculates the reliability factor of the bearing.
+--> 7) "calculateEtaC(self, condition="")": calculates the contamination factor of the bearing.
+--> 8) "calculateBearingLife(self)": calculates the bearing life in millions of cycles and hours.
 '''
 from .component import Component
 from .force import Force

@@ -1,6 +1,9 @@
 '''
-This is the NotchSensitivity class.
+This is the "Notch Sensitivity" class.
 It contains the data and the necessary calculations via interpolation to get the final factor.
+
+The reference property can be viewed by calling the plot function implemented:
+--> 1) "plotqRef(self)": plots the reference notch sensitivity.
 '''
 import numpy as np
 import matplotlib.pyplot as plt

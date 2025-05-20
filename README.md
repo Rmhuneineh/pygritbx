@@ -52,3 +52,9 @@ II. Haigh Diagram
 ## Installation
 For installation, make sure the proper environment is activated and execute the following command in the command line prompt:
 <pre> pip install pygritbx </pre>
+
+## What's New?
+- Bug fixes.
+- Automated static and fatigue verification for shafts by implmenting the ".performStaticVerification()" and ".performFatigueVerification()" functions in the Shaft class.
+- Automated gear tooth bending and gear tooth pitting analyses by implementing ".analyseGearToothBending()" and "analyseGearToothPitting()" functions in the Gear class.
+- Modified examples according to latest implementations.

@@ -2,14 +2,26 @@ import numpy as np
 '''
 This is the "Component" class.
 It's a parent class that defines general properties that are common among different components.
-Other classes will inherit these properties instead of having to define every single time.
-Properties are:
-1) "name": a string of characters acting as a label
-2) "material": a "Material" object of the material class defining the material properties of the component
-3) "axis": a 3-element vector representing the axis along which the component is rotating with respect to a defined reference frame
-4) "loc": a 3-element vector representing the location of the component with respect to a defined reference frame
-5) "F_tot": the total force acting on the component expressed in [N]
-6) "T_tot": the total torque acting on the component expressed in [Nm]
+Other classes will inherit these properties instead of having to define them every single time.
+
+The properties are:
+--> 1) "name": a string of characters acting as a label
+--> 2) "material": a "Material" object of the material class defining the material properties of the component
+--> 3) "axis": a 3-element vector representing the axis along which the component is rotating with respect to a defined reference frame
+--> 4) "loc": a scalar representing the location of the component with respect to the axis of a Shaft component expressed in [mm]
+--> 5) "rel_loc": a 3-element vector representing the relative location of the component with respect to the axis of a Shaft component expressed in [mm]
+--> 6) "abs_loc": a 3-element vector representing the absolute location of the component with respect to (0, 0, 0) reference frame expressed in [mm]
+--> 7) "EFs": a numpy array representing the list of external forces acting on the component expressed in  [N] 
+--> 8) "ETs": a numpy array representing the list of external torques acting on the component expressed in [Nm]
+--> 9) "onShaft": a Shaft object representing the specific shaft the component is mounted on
+
+These properites can be used and manipulated via the following fucntions:
+--> 1) "checkForceEquilibrium(self)": sums the forces in 'EFs' and returns a boolean indicating whether sum is equal to [0, 0, 0]; thsu, satisfying force equilibrium condition.
+--> 2) "checkTorqueEquilibrium(self)": virtual function to be implemented where necessary in a child class. It must ensure torque equilibrium on the component.
+--> 3) "solve(self)": virtual function to be implemented where necessary in a child class. It must resolve any missing forces/torques acting on the component.
+--> 4) "updateEFs(self, EFs=[])": updates the list of external forces "self.EFs" by appending the forces in the input parameter "EFs" if not already in the list.
+--> 5) "updateETs(self, ETs=[])": updates the list of external torques "self.ETs" by appending the torques in the input parameter "ETs" if not already in the list.
+--> 6) "updateLoc(self)": updates either "self.rel_loc" or "self.abs_loc" based on which one the user gave as input.
 '''
 class Component:
 

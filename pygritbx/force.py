@@ -1,8 +1,9 @@
 '''
 This is the "Force" class.
+
 It defines a force vector based on two simple properties:
-1) "force": a 3-element force vector representing the force expressed in [N]
-2) "loc": a 3-element vector representing the point of application of the force expressed in [mm]
+--> 1) "force": a 3-element force vector representing the force expressed in [N]
+--> 2) "loc": a scalar or 3-element vector representing the point of application of the force expressed in [mm]
 '''
 import numpy as np
 class Force:

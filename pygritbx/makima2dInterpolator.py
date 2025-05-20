@@ -1,5 +1,5 @@
 '''
-This is the Makima2DInterpolator class.
+This is the "Makima 2D Interpolator" class.
 It allows to define an interpolator based on the Modified Akima method.
 A linear extrapolation method is used across the bounds.
 '''

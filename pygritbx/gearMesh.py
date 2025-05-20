@@ -1,19 +1,23 @@
 '''
-This is the gearMesh class.
+This is the "Gear Mesh" class.
 It defines a gear mesh by relying on 2 gear components and the type of mesh.
+
 The properties used are:
 I) Given properties
---> 1) "drivingGear": a gear component to which the input is connected to
---> 2) "drivenGear": a gear component to which the output in connectec to
---> 3) "axis": a 3-element vector representing the axis of rotation
+--> 1) "drivingGear": a gear component representing the input gear of the gear mesh
+--> 2) "drivenGear": a gear component represnting the output gear of the gear mesh
+--> 3) "axis": a 3-element vector representing the direction along which the centers of the driving gear and the driven gear centers are connected
 --> 4) "type": a string of characters indicating the gear mesh type: Internal / External
+
 II) Calculated properties
 --> 1) "ratio": the gear ratio calculated based on the number of teeth
 --> 2) "m_G": the reciprocal of the gear ratio
-After creating an instance of the class, it's possible to get the rotational velocity as well as the torque corresponding to the driven gear via:
-1) GetOmegaMesh()
-2) GetMeshTorque()
-methods, respectively.
+--> 3) "loc": a 3-element vector representing the location of the gear mesh with respect to the origin [0, 0, 0]
+--> 4) "F": a 3-element vector representing the resultant force acting on the driven gear due to the gear mesh object defined
+--> 5) "F_t": a 3-element vector representing the tangential force component of the resultant force
+--> 6) "F_r": a 3-element vector representing the radial force component of the resultant force
+--> 7) "F_a": a 3-element vector representing the axial force component of the resultant force
+
 '''
 import numpy as np
 from .torque import Torque

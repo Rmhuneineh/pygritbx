@@ -1,13 +1,15 @@
 '''
-This is the "ShaftSection" class.
+This is the "Shaft Section" class.
 It's used to define certain sections of a "Shaft" component along its profile.
+
 It has the following properties:
 I) Given Properties:
 --> 1) "name": a string of characters acting as a label
---> 2) "loc": a 3-D element vector representing the location of the section along the shaft
+--> 2) "loc": a scalar/3-D element vector representing the location of the section along the shaft
 --> 3) "d": a scalar representing the diameter of the shaft at the specified cross-section expressed in [mm]
 --> 4) "Ra": a scalar representing the surface roughness at the specified cross-section expressed in [micrometers]
 --> 5) "material": a Material object representing the material of the shaft
+
 II) Calculated Properties:
 --> 1) "sigma_m_Mb": mean bending stress [MPa]
 --> 2) "sigma_a_Mb": alternating bending stress [MPa]
@@ -21,6 +23,18 @@ II) Calculated Properties:
 --> 10) "Kf_B": bending stress concentration factor
 --> 11) "Kf_N": normal stress concentration factor
 --> 12) "Kf_T": torsion stress concentration factor
+
+The properties can be manipulated or used via the following functions:
+--> 1) "appendKf(self, Kf=0, loadType="")": appends a stress concentration factor according to the given load type.
+--> 2) "calculateFatigueIntensificationFactor(self)": calculates the fatigue intensification factor for every load type and appends it to the list of concentration factors.
+--> 3) "addNotchSensitivity(self, notchRadius=0, sigma_u=0)": calculates the notch sensitivity and then calls the "calculateFatigueIntensificatinoFactor" function if geometric stress raisers are not "None".
+--> 4) "addGeometricStressRaiser(self, r2d=0, D2d=0)": calculates geometric stress raisers then calls the "calculateFatigueIntensificationFactor" function.
+--> 5) "addFLCF(self)": calculates fatigue limit corrector factors then calls the material's "calculateComponentFatigueLimit" to calculate the shaft's specific fatigue limit at section object.
+--> 6) "calculateSectionEquivalentStress(self)": calculates section's equivalent mean and laternating stresses according to the Shighley method.
+--> 7) "plotHaighDiagram(self)": plots the Haigh Diagram representing the operating point on section object.
+--> 8) "calculateSectionStaticSafetyFactor(self, profile=None)": calculates the section's safety factor relative to the shaft's given profile.
+--> 9) "calculateSectionMeanAlternatingStress(self, profile=None)": calculates the section's mean and alternating stresses relative the shaft's given profile.
+--> 10) "calculateSectionFatigueSafetyFactor(self)": calculates the section's fatigue safety factor.
 '''
 from .notchSensitivity import NotchSensitivity
 from .fatigueLimitCorrectorFactors import FatigueLimitCorrectorFactors
@@ -69,15 +83,15 @@ class ShaftSection:
             
     # Calculate fatigue stress intensification factor
     def calculateFatigueIntensificationFactor(self):
-        self.__class__.appendKf(self, [1 + self.q.qReq * (self.Kt_B - 1)], ["Bending"])
-        self.__class__.appendKf(self, [1 + self.q.qReq * (self.Kt_N - 1)], ["Normal"])
-        self.__class__.appendKf(self, [1 + self.q.qReq * (self.Kt_T - 1)], ["Torsion"])
+        self.appendKf(self, [1 + self.q.qReq * (self.Kt_B - 1)], ["Bending"])
+        self.appendKf(self, [1 + self.q.qReq * (self.Kt_N - 1)], ["Normal"])
+        self.appendKf(self, [1 + self.q.qReq * (self.Kt_T - 1)], ["Torsion"])
 
     # Notch Sensitivity
     def addNotchSensitivity(self, notchRadius=0, sigma_u=0):
         self.q = NotchSensitivity(notchRadius=notchRadius, sigma_u=sigma_u)
         if self.Kt_B == None and self.Kt_N == None and self.Kt_T == None:
-            self.__class__.calculateFatigueIntensificationFactor(self)
+            self.calculateFatigueIntensificationFactor(self)
     
     #Geomtric Stress Raiser
     def addGeometricStressRaiser(self, r2d=0, D2d=0):
@@ -90,7 +104,7 @@ class ShaftSection:
     # Add fatigue limit corrector factors
     def addFLCF(self):
         self.FLCF = FatigueLimitCorrectorFactors(self)
-        self.material.ComponentFatigueLimit(self)
+        self.material.calculateComponentFatigueLimit(self)
     
     # Calculate Equivalent Stress
     def calculateSectionEquivalentStress(self):

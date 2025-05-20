@@ -1,10 +1,16 @@
 '''
-This is the GeometricStressRaiser class.
+This is the "Geometric Stress Raiser" class.
 It contains the data and the necessary calculations via interpolation to get the final factor.
+
 The properties are:
-1) "Kt_B": bending geometric stress raiser
-2) "Kt_N": normal geometric stress raiser
-3) "Kt_T": torsion geometric stress raiser
+--> 1) "Kt_B": bending geometric stress raiser
+--> 2) "Kt_N": normal geometric stress raiser
+--> 3) "Kt_T": torsion geometric stress raiser
+
+The reference properties can be viewed by calling any of the plot functions implemented:
+--> 1) "plotKtBRef(self)": plots the reference bending geometric stress raiser.
+--> 2) "plotKtNRef(self)": plots the reference normal geometric stress raiser.
+--> 3) "PlotKtTRef(self)": plots the reference torsion geometric stress raiser.
 '''
 import numpy as np
 from .makima2dInterpolator import Makima2DInterpolator

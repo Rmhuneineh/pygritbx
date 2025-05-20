@@ -1,3 +1,33 @@
+'''
+This is the "Shaft Profile" class.
+This class is responsible for defining the properties of a Shaft Profile object, such as:
+
+I) Given properties:
+--> 1) "name": a string of characters acting as a label
+--> 2) "radii": a numpy array representing the external radius of the shaft at each step along the shaft's axis
+--> 3) "locs": a numpy array representing the locations of the specified raddi along the shaft's axis
+
+II) Calculated properties:
+--> 1) "shaft": a shaft object to which the shaft's profile belongs
+--> 2) "Area:: a numpy array representing the area of the cross-section of the shaft at each step along the shaft's profile expressed in [mm^2]
+--> 3) "Wb": a numpy array representing the bending section modulus of the cross-section of the shaft at each step along the shaft's profile expressed in [mm^3]
+--> 4) "Wt": a numpy array representing the torsion section modulus of the cross-section of the shaft at each step along the shaft's profile expressed in [mm^3]
+--> 5) "sigma_N": a numpy array representing the normal stress acting on the shaft at each step along the shaft's profile expressed in [MPa]
+--> 6) "sigma_Mb": a numpy array representing the resultant bending stress acting on the shaft at each step along the shaft's profile expressed in [MPa]
+--> 7) "tau_Mt": a numpy array representing the torsional stress acting on the shaft at each step along the shaft's profile expressed in [MPa]
+--> 8) "sigma_tot": a numpy array representing the equivalent normal stress acting on the shaft at each step along the shaft's profile expressed in [MPa]
+--> 9) "sigma_id": a numpy array representing the ideal stress acting on the shaft at each step along the shaft's profile expressed in [MPa]
+
+The properties can be manipulated or used via the following functions:
+--> 1) "addFillet(self, radius=0, quadrant=[], zOff=0, dOff=0)": adds a fillet at position with axis offset "zOff" and radial offset "dOff" (both expressed in [mm]) with the specified radius expressed in [mm]. The "quadrant" parameter is a list specifying whether the notch is to the right of a shoulder (=[1]) or to the left of a shoulder (=[2]) or existing simply in the middle of the shaft as a groove (=[1, 2]).
+--> 2) "refineProfile(self, name="", delta=0.1)": refines the profile by adding more points equally-spaced according to "delta".
+--> 3) "calculateSectionProperties(self)": calculates all section properties.
+--> 4) "plotProfile(self, ax=None)": plots the shaft's profile on a given axis, "ax", belonging to a matplotlib.pyplot plot.
+--> 5) "calculateProfileStresses(self)": calculates the stresses at each step along the shaft's profile.
+--> 6) "calculateProfileEquivalentAndIdealStress(self)": calculate equivalent and ideal stresses at each step along the shaft's profile.
+--> 7) "plotStresses(self)": uses the Shaft class's "plotLoad" function to plot the stresses along the shaft's profile.
+'''
+
 import numpy as np
 from math import pi
 class ShaftProfile:

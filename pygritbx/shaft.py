@@ -1,3 +1,42 @@
+'''
+This is the "Shaft" class. It inherits from "Component" class.
+This class is responsible for defining the properties of a Shaft object, such as:
+
+I) Given properties:
+--> 1) "inputs": a list containing component objects representing the inputs from the shaft's perspective
+--> 2) "outputs": a list containing component objects representing the outputs from the shafts's perspective
+--> 3) "sups": a list containing support objects representing the bearings on the shaft
+--> 4) "material": a Material object representing the material properties of the shaft
+--> 5) "sections": a list of shaft section objects representing the sections at which to perform static/fatigue analysis
+--> 6) "profiles": a list of shaft profile objects representing the profile of the shaft (could be more than one for different type of analyses)
+
+II) Calculated properties:
+--> 1) "N": an n-element vector representing the normal internal load distribution along the shaft's axis
+--> 2) "Mx": an n-element vector representing the bending moment around x-axis  internal load distribution along the shaft's axis
+--> 3) "My": an n-element vector representing the bending moment around y-axis  internal load distribution along the shaft's axis
+--> 4) "Mt": an n-element vector representing the torsional moment around z-axis internal load distribution along the shaft's axis
+
+Moreover, the user can carry out all the necessary calculations via the following functions:
+--> 1) "solve(self)": implementation of virtual function from parent class resolving the external force(s)/torque(s) acting on the shaft.
+--> 2) "checkTorqueEquilibrium(self)": implmenetation of virtual function from parent class to check torque equilibrium on shaft by involving external torques and forces, the latter with their corresponding locations with respect to the shaft.
+--> 3) "calculateTorque(self, comp=None)": calculates the external torque acting on the shaft due to component "comp" with unknown torque. Adds the torque to the shaft's "ETs" and the component's "ETs".
+--> 4) "addProfile(self, profile=None)": adds profile to the list of profiles "self.profiles" if it doesn't exist yet in the list.
+--> 5) "addSection(self, sections=[])": adds the list of sections to "self.sections".
+--> 6) "insertFLCF(self)": inserts fatigue limit correction factors to the sections in "self.sections".
+--> 7) "calculateReactionForces(self)": calculates the forces on the bearings of the shaft by imposing equilibrium conditions with all external forces in "self.EFs".
+--> 8) "performStaticVerification(self, RF=None, profile=None)": performs static verification on all sections in "self.sections" relative to the shaft's given profile.
+--> 9) "performFatigueVerification(self, RF=None, profile=None)": perform fatigue verification on all sections in "self.sections" relative to the shaft's given profile.
+--> 10) "calculateInternalLoads(self, RF=None, profile=None)": calculates the internal loads acting on the shaft relative to the given profile.
+--> 11) "calculateStresses(self, profile=None)": calculates the stresses acting on the shaft relative the shaft's given profile.
+--> 12) "calculateEquivalentAndIdealStress(self, profile=None)": calculates equivalent and ideal stresses along the shaft's given profile.
+--> 13) "plotInternalLoads(self, profile=None)": plots the internal loads acting on the shaft relative to the shaft's given profile.
+--> 14) "plotLoad(self, load=[], ylabel="", title="", profile=None)": generic function to plot an internal load/stress acting on the shaft relative to the shaft's given profile.
+--> 15) "calculateStaticSafetyFactor(self, profile=None)": calculates the static safety factor on all sections in "self.sections" relative to the shaft's given profile.
+--> 16) "calculateMeanAlternatingStress(self, profile=None)": calculates the mean and alternating stresses on all sections in "self.sections" relative the shaft's given profile.
+--> 17) "calculateEquivalentStresses(self)": calculates the equivalent mean and alternating stresses on all sections in "self.sections".
+--> 18) "calculateFatigueSafetyFactor(self)": calculates the fatigue safety factor on all sections in "self.sections".
+'''
+
 import numpy as np
 import matplotlib.pyplot as plt
 from .component import Component
@@ -130,7 +169,7 @@ class Shaft(Component):
             self.profiles = np.append(self.profiles, profile)
     
     # Add sections
-    def addSections(self, sections=None):
+    def addSections(self, sections=[]):
         for section in sections:
             section.material = self.material
         self.sections = np.append(self.sections, sections)
