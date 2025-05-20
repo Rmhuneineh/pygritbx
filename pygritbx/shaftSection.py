@@ -83,9 +83,9 @@ class ShaftSection:
             
     # Calculate fatigue stress intensification factor
     def calculateFatigueIntensificationFactor(self):
-        self.appendKf(self, [1 + self.q.qReq * (self.Kt_B - 1)], ["Bending"])
-        self.appendKf(self, [1 + self.q.qReq * (self.Kt_N - 1)], ["Normal"])
-        self.appendKf(self, [1 + self.q.qReq * (self.Kt_T - 1)], ["Torsion"])
+        self.appendKf([1 + self.q.qReq * (self.Kt_B - 1)], ["Bending"])
+        self.appendKf([1 + self.q.qReq * (self.Kt_N - 1)], ["Normal"])
+        self.appendKf([1 + self.q.qReq * (self.Kt_T - 1)], ["Torsion"])
 
     # Notch Sensitivity
     def addNotchSensitivity(self, notchRadius=0, sigma_u=0):

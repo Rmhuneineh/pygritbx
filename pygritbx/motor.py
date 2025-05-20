@@ -27,9 +27,9 @@ class Motor(Component):
         # Given properties
         super().__init__(name=name, material=None, axis=axis, loc=loc)
         # Check for valid input
-        if power == 0 and n == 0 and torque.size == 0:
+        if power == 0 and n == 0 and torque.torque.size == 0:
             raise ValueError("A minimum of 2 out of 3 inputs are necessary: power, n, and torque.")
-        elif power != 0 and n != 0 and torque.size != 0:
+        elif power != 0 and n != 0 and torque.torque.size != 0:
             omega = n * pi / 30 * self.axis
             omega_mag = np.sqrt(np.sum(omega * omega))
             if power != torque.mag() * omega_mag:
