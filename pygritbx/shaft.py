@@ -198,7 +198,7 @@ class Shaft(Component):
                 supDist = self.supports[i].abs_loc - self.supports[index].abs_loc
                 supDist_rec = np.array([1/d if d != 0 else 0 for d in supDist])
                 for EF in self.EFs:
-                    momEF = np.cross(EF.force, (EF.loc - self.supports[index].abs_loc)) * 1e-3
+                    momEF = EF.moment(self.supports[index].abs_loc) #np.cross(EF.force, (EF.loc - self.supports[index].abs_loc)) * 1e-3
                     self.supports[i].F_tot.force += np.cross(momEF, supDist_rec) * 1e3
                 self.updateEFs([self.supports[i].F_tot])
         # Calculate reaction around bearing with sum of external forces
@@ -342,12 +342,12 @@ class Shaft(Component):
             for i, z in enumerate(profile.locs):
                 if np.dot(EF.loc - self.abs_loc, np.abs(self.axis)) <= z:
                     self.N[i] = self.N[i] - np.sum(EF.force * np.abs(self.axis))
-                    mxz = np.sum(np.cross(EF.force * RF[2], EF.loc * RF[1]))
-                    mxy = np.sum(np.cross(EF.force * RF[1], (z - EF.loc ) * RF[2]))
-                    self.Mx[i] = self.Mx[i] + (mxz - mxy) * 1e-3
-                    myz = np.sum(np.cross(EF.force * RF[2], EF.loc * RF[0]))
-                    myx = np.sum(np.cross(EF.force * RF[0], (EF.loc - z) * RF[2]))
-                    self.My[i] = self.My[i] + (myz + myx) * 1e-3
+                    mxz = EF.moment(axis=RF[1], projection=RF[2]) #np.sum(np.cross(EF.force * RF[2], EF.loc * RF[1]))
+                    mxy = EF.moment(location=z - EF.loc, axis=RF[2], projection=RF[1]) #np.sum(np.cross(EF.force * RF[1], (z - EF.loc ) * RF[2]))
+                    self.Mx[i] = self.Mx[i] + (mxz - mxy)
+                    myz = EF.moment(axis=RF[0], projection=RF[2]) #np.sum(np.cross(EF.force * RF[2], EF.loc * RF[0]))
+                    myx = EF.moment(location=EF.loc - z, axis=RF[2], projection=RF[0]) #np.sum(np.cross(EF.force * RF[0], (EF.loc - z) * RF[2]))
+                    self.My[i] = self.My[i] + (myz + myx)
         for ET in self.ETs:
                 for i, z in enumerate(profile.locs):
                     if np.dot(ET.loc - self.abs_loc, np.abs(self.axis)) <= z:

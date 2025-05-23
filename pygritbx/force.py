@@ -38,3 +38,16 @@ class Force:
     # Calculate Magnitude
     def mag(self):
         return np.sqrt(np.sum(self.force * self.force))
+    
+    # Calculate moment at location around axis
+    def moment(self, location=np.array([]), axis=np.array([]), projection=np.array([])):
+        if projection.size == 0:
+            if axis.size == 0:
+                return np.cross(self.force, (self.loc - location) * 1e-3)
+            else:
+                return np.cross(self.force, (self.loc - location) * 1e-3) * np.abs(axis)
+        else:
+            if location.size == 0:
+                return np.sum(np.cross(self.force * projection, self.loc * axis * 1e-3))
+            else:
+                return np.sum(np.cross(self.force * projection, location * axis * 1e-3))

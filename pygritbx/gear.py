@@ -187,7 +187,7 @@ class Gear(Component):
         for ET in self.ETs:
             eq += ET.torque
         for EF in self.EFs:
-            eq += np.cross(EF.force, (EF.loc - self.abs_loc) * 1e-3) * np.abs(self.axis)
+            eq += EF.moment(self.abs_loc, self.axis) #np.cross(EF.force, (EF.loc - self.abs_loc) * 1e-3) * np.abs(self.axis)
         if all(np.abs(eq) <= 1e-3 * np.ones(3)):
             print(f"{self.name} mainatains a torque equilibrium.")
             eqState = True
@@ -199,14 +199,14 @@ class Gear(Component):
     def calculateTorque(self):
         ET = Torque(np.zeros(3), self.abs_loc)
         for EF in self.EFs:
-            ET.torque -= np.cross(EF.force, (EF.loc - self.abs_loc) * 1e-3) * np.abs(self.axis)
+            ET.torque -= EF.moment(self.abs_loc, self.axis)
         self.updateETs([ET])
 
     # Calculate Forces
     def calculateForces(self, mesh=None):
         ET = self.ETs[0].torque
         for EF in self.EFs:
-            ET -= np.cross(EF.force, (EF.loc - self.abs_loc) * 1e-3) * np.abs(self.axis)
+            ET -= EF.moment(self.abs_loc, self.axis)
         sign = 1
         if self.name == mesh.drivingGear.name:
             sign = -1
