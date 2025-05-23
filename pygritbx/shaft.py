@@ -342,11 +342,11 @@ class Shaft(Component):
             for i, z in enumerate(profile.locs):
                 if np.dot(EF.loc - self.abs_loc, np.abs(self.axis)) <= z:
                     self.N[i] = self.N[i] - np.sum(EF.force * np.abs(self.axis))
-                    mxz = EF.moment(axis=RF[1], projection=RF[2]) #np.sum(np.cross(EF.force * RF[2], EF.loc * RF[1]))
-                    mxy = EF.moment(location=z - EF.loc, axis=RF[2], projection=RF[1]) #np.sum(np.cross(EF.force * RF[1], (z - EF.loc ) * RF[2]))
+                    mxz = EF.moment(axis=RF[1], projection=RF[2])
+                    mxy = EF.moment(location=z - EF.loc, axis=RF[2], projection=RF[1])
                     self.Mx[i] = self.Mx[i] + (mxz - mxy)
-                    myz = EF.moment(axis=RF[0], projection=RF[2]) #np.sum(np.cross(EF.force * RF[2], EF.loc * RF[0]))
-                    myx = EF.moment(location=EF.loc - z, axis=RF[2], projection=RF[0]) #np.sum(np.cross(EF.force * RF[0], (EF.loc - z) * RF[2]))
+                    myz = EF.moment(axis=RF[0], projection=RF[2])
+                    myx = EF.moment(location=EF.loc - z, axis=RF[2], projection=RF[0])
                     self.My[i] = self.My[i] + (myz + myx)
         for ET in self.ETs:
                 for i, z in enumerate(profile.locs):
