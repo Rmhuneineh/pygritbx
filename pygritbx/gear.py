@@ -210,12 +210,12 @@ class Gear(Component):
         sign = 1
         if self.name == mesh.drivingGear.name:
             sign = -1
-        F_t = np.cross(ET, 2 / self.d * mesh.axis) * 1e3
+        F_t = np.cross(ET, 2 / self.d * mesh.radiality) * 1e3
         mesh.F_t.force = sign * F_t
         magF_t = sqrt(np.sum(F_t * F_t))
-        F_r = sign * magF_t * tan(self.phi_n) / cos(self.psi) * mesh.axis
+        F_r = sign * magF_t * tan(self.phi_n) / cos(self.psi) * mesh.radiality
         mesh.F_r.force = sign * F_r
-        F_a = np.sign(np.sum(self.onShaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.axis, F_t * tan(np.abs(self.psi))))
+        F_a = np.sign(np.sum(self.onShaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.radiality, F_t * tan(np.abs(self.psi))))
         mesh.F_a.force = -F_a
         self.updateEFs([Force(F_t + F_r + F_a, mesh.loc)])
         mesh.F.force = mesh.F_t.force + mesh.F_r.force + mesh.F_a.force

@@ -6,7 +6,7 @@ The properties used are:
 I) Given properties
 --> 1) "drivingGear": a gear component representing the input gear of the gear mesh
 --> 2) "drivenGear": a gear component represnting the output gear of the gear mesh
---> 3) "axis": a 3-element vector representing the direction along which the centers of the driving gear and the driven gear centers are connected
+--> 3) "radiality": a 1/2-element vector where each element is composed of 3-element vector representing the direction along which the centers of the driving gear and the driven gear centers are connected with the teeth contact point
 --> 4) "type": a string of characters indicating the gear mesh type: Internal / External
 
 II) Calculated properties
@@ -25,19 +25,19 @@ from .force import Force
 class GearMesh:
 
     # Constructor
-    def __init__(self, name="", drivingGear=None, drivenGear=None, axis=np.zeros(3), type=""):
+    def __init__(self, name="", drivingGear=None, drivenGear=None, radiality=np.zeros(3), type=""):
         if drivingGear == None or drivenGear == None:
             raise ValueError("Driving or driven gear missing!")
         if drivingGear.m_n != drivenGear.m_n:
             raise Exception("Incompatible Gear Mesh!")
         # Update location of driven gear
         if drivenGear.abs_loc.size == 0:
-            drivenGear.abs_loc = drivingGear.abs_loc + axis * (drivingGear.d + drivenGear.d) / 2
+            drivenGear.abs_loc = drivingGear.abs_loc + radiality * (drivingGear.d + drivenGear.d) / 2
         # Given properties
         self.name = name
         self.drivingGear = drivingGear
         self.drivenGear = drivenGear
-        self.axis = axis
+        self.radiality = radiality
         self.type = type
         # Calculated properties
         self.ratio = self.drivingGear.z / self.drivenGear.z
@@ -47,7 +47,7 @@ class GearMesh:
             sgn = -1
         self.drivenGear.omega = sgn * self.ratio * self.drivingGear.omega
         #self.drivenGear.T_tot = Torque(-sgn * self.drivingGear.T_tot.torque / self.ratio, self.drivenGear.loc)
-        self.loc = self.drivingGear.d / 2 * self.axis + self.drivingGear.abs_loc
+        self.loc = self.drivingGear.d / 2 * self.radiality + self.drivingGear.abs_loc
         self.F = Force(np.zeros(3), self.loc) # Resultant Force
         self.F_t = Force(np.zeros(3), self.loc) # Tangential Force
         self.F_r = Force(np.zeros(3), self.loc) # Radial Force
