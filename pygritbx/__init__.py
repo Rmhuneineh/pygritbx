@@ -6,6 +6,7 @@ from .force import Force
 from .gearMesh import GearMesh
 from .geometricStressRaiser import GeometricStressRaiser
 from .gear import Gear
+from .bevelGear import BevelGear
 from .motor import Motor
 from .makima2dInterpolator import Makima2DInterpolator
 from .material import Material

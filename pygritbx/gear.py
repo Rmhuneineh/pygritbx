@@ -123,7 +123,10 @@ class Gear(Component):
         # Calculated parameters
         self.p_n = self.m_n * pi
         self.p_t = self.p_n / cos(self.psi)
-        self.p_x = self.p_t / tan(self.psi)
+        if psi != 0:
+            self.p_x = self.p_t / tan(self.psi)
+        else:
+            self.p_x = 0
         self.m_t = self.m_n / cos(self.psi)
         self.d = self.m_t * self.z
         self.phi_t = atan(tan(self.phi_n) / cos(self.psi))
@@ -199,7 +202,7 @@ class Gear(Component):
     def calculateTorque(self):
         ET = Torque(np.zeros(3), self.abs_loc)
         for EF in self.EFs:
-            ET.torque -= EF.moment(self.abs_loc, self.axis)
+            ET.torque -= EF.moment(location=self.abs_loc, axis=self.axis)
         self.updateETs([ET])
 
     # Calculate Forces
@@ -210,15 +213,31 @@ class Gear(Component):
         sign = 1
         if self.name == mesh.drivingGear.name:
             sign = -1
-        F_t = np.cross(ET, 2 / self.d * mesh.radiality) * 1e3
-        mesh.F_t.force = sign * F_t
-        magF_t = sqrt(np.sum(F_t * F_t))
-        F_r = sign * magF_t * tan(self.phi_n) / cos(self.psi) * mesh.radiality
-        mesh.F_r.force = sign * F_r
-        F_a = np.sign(np.sum(self.onShaft.axis)) * np.sign(self.psi) * np.abs(np.cross(mesh.radiality, F_t * tan(np.abs(self.psi))))
-        mesh.F_a.force = -F_a
-        self.updateEFs([Force(F_t + F_r + F_a, mesh.loc)])
-        mesh.F.force = mesh.F_t.force + mesh.F_r.force + mesh.F_a.force
+        if np.shape(mesh.radiality)[0] == 1:
+            radiality = mesh.radiality[0]
+            F_t = np.cross(ET, 2 / self.d * radiality) * 1e3
+            mesh.F_t.force = sign * F_t
+            magF_t = sqrt(np.sum(F_t * F_t))
+            F_r = sign * magF_t * tan(self.phi_n) / cos(self.psi) * radiality
+            mesh.F_r.force = sign * F_r
+            F_a = np.sign(np.sum(self.onShaft.axis)) * np.sign(self.psi) * np.abs(np.cross(radiality, F_t * tan(np.abs(self.psi))))
+            mesh.F_a.force = -F_a
+            self.updateEFs([Force(F_t + F_r + F_a, mesh.loc)])
+            mesh.F.force = mesh.F_t.force + mesh.F_r.force + mesh.F_a.force
+        else:
+            if sign == 1:
+                radiality = mesh.radiality[1]
+            else:
+                radiality = mesh.radiality[0]
+            F_t = np.cross(ET, 2 / self.d_av * radiality) * 1e3
+            mesh.F_t.force = sign * F_t
+            magF_t = sqrt(np.sum(F_t * F_t))
+            F_r = sign * magF_t * tan(self.phi_n) * cos(self.gamma) * radiality
+            mesh.F_r.force = sign * F_r
+            F_a = sign * np.cross(radiality, F_t * tan(np.abs(self.phi_n)) * sin(self.gamma))
+            mesh.F_a.force = -F_a
+            self.updateEFs([Force(F_t + F_r + F_a, mesh.loc)])
+            mesh.F.force = mesh.F_t.force + mesh.F_r.force + mesh.F_a.force
 
     # Perform gear tooth bending analysis
     def analyseGearToothBending(self, mesh=None, powerSource="", drivenMachine="", dShaft=0, Ce=0, teethCond="", lShaft=0, useCond="",

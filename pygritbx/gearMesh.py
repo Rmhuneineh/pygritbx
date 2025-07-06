@@ -32,7 +32,10 @@ class GearMesh:
             raise Exception("Incompatible Gear Mesh!")
         # Update location of driven gear
         if drivenGear.abs_loc.size == 0:
-            drivenGear.abs_loc = drivingGear.abs_loc + radiality * (drivingGear.d + drivenGear.d) / 2
+            if np.shape(radiality)[0] == 1:
+                drivenGear.abs_loc = drivingGear.abs_loc + radiality[0] * (drivingGear.d + drivenGear.d) / 2
+            else:
+                drivenGear.abs_loc = drivingGear.abs_loc + (radiality[0] * drivingGear.d + radiality[1] * drivenGear.d) / 2
         # Given properties
         self.name = name
         self.drivingGear = drivingGear
@@ -46,8 +49,10 @@ class GearMesh:
         if self.type == "External":
             sgn = -1
         self.drivenGear.omega = sgn * self.ratio * self.drivingGear.omega
-        #self.drivenGear.T_tot = Torque(-sgn * self.drivingGear.T_tot.torque / self.ratio, self.drivenGear.loc)
-        self.loc = self.drivingGear.d / 2 * self.radiality + self.drivingGear.abs_loc
+        if np.shape(radiality)[0] == 1:
+            self.loc = self.drivingGear.d / 2 * self.radiality[0] + self.drivingGear.abs_loc
+        else:
+            self.loc = self.drivingGear.d_av / 2 * self.radiality[0] + self.drivingGear.abs_loc
         self.F = Force(np.zeros(3), self.loc) # Resultant Force
         self.F_t = Force(np.zeros(3), self.loc) # Tangential Force
         self.F_r = Force(np.zeros(3), self.loc) # Radial Force
