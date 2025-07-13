@@ -186,39 +186,31 @@ class Shaft(Component):
         for EF in self.EFs:
             K_a = K_a + (EF.force * self.axis)
         K_a = np.sum(K_a)
-        print(f"Summation of external forces without bearing in the axial direction: {K_a} with sign {np.sign(K_a)}")
         # Find the bearing around which to apply moment
         index = 0
         for i in range(len(self.supports)):
             if self.supports[i].type == "Pin":
                 index = i
                 self.supports[index].F_tot = Force(np.zeros(3), self.supports[index].abs_loc)
-        print(f"Found pin bearing: '{self.supports[index].name}'")
         # Calculate reaction on other bearing
         bearingSupportsAxial = False
         for i in range(len(self.supports)):
             if i != index:
                 if self.supports[i].bearingType == "Tapered" or self.supports[i].bearingType == "Contact Ball":
                     bearingSupportsAxial = True
-                print(f"Calculating reaction on bearing '{self.supports[i].name}' by applying moment around bearing '{self.supports[index].name}'")
                 self.supports[i].F_tot = Force(np.zeros(3), self.supports[i].abs_loc)
                 supDist = self.supports[i].abs_loc - self.supports[index].abs_loc
                 supDist_rec = np.array([1/d if d != 0 else 0 for d in supDist])
-                print(f"Distance between two bearing: {supDist}")
                 for EF in self.EFs:
                     momEF = EF.moment(location=self.supports[index].abs_loc) #np.cross(EF.force, (EF.loc - self.supports[index].abs_loc)) * 1e-3
                     self.supports[i].F_tot.force += np.cross(momEF, supDist_rec) * 1e3
-                print(f"Calculated total force on bearing '{self.supports[i].name}': {self.supports[i].F_tot.force}")
                 self.supports[index].F_tot.force -= self.supports[i].F_tot.force
-                #self.updateEFs([self.supports[i].F_tot])
         # Calculate reaction around bearing with sum of external forces
         for EF in self.EFs:
             if bearingSupportsAxial:
                 self.supports[index].F_tot.force -= EF.force*(1 - self.axis)
             else:
                 self.supports[index].F_tot.force -= EF.force
-        
-        #self.updateEFs([self.supports[index].F_tot])
         # Update axial load based on configuration
         if (self.supports[0].bearingType == "Tapered" and self.supports[1].bearingType == "Tapered") or (self.supports[0].bearingType == "Contact Ball" and self.supports[1].bearingType == "Contact Ball"):
             if self.supports[0].shoulder == -1:
@@ -227,9 +219,6 @@ class Shaft(Component):
             else:
                 indA = 0
                 indB = 1
-
-            print(f"Bearing 'A' from the shaft's pov: {self.supports[indA].name}")
-            print(f"Bearing 'B' from the shaft's pov: {self.supports[indB].name}")
             btype = self.supports[indA].bearingType
             A_FrV = self.supports[indA].F_tot.force - (self.supports[indA].F_tot.force * self.axis)
             A_Fr = np.sqrt(np.sum(A_FrV * A_FrV))
@@ -315,21 +304,8 @@ class Shaft(Component):
                         A_Fa = self.supports[indA].R * A_Fr
                         B_Fa = -(A_Fa + K_a)
             
-            print(f"{self.supports[indA].name} total force before update: {self.supports[indA].F_tot.force}")
-            print(f"{self.supports[indA].name} axial force component: {A_Fa}")
-            print(f"{self.supports[indB].name} total force before update: {self.supports[indB].F_tot.force}")
-            print(f"{self.supports[indB].name} axial force component: {B_Fa}")
             self.supports[indA].F_tot.force += (A_Fa * self.axis)
             self.supports[indB].F_tot.force += (B_Fa * self.axis)
-            print(f"{self.supports[indA].name} total force after update: {self.supports[indA].F_tot.force}")
-            print(f"{self.supports[indB].name} total force after update: {self.supports[indB].F_tot.force}")
-
-            # if self.supports[0].arr == "B2B":
-            #     self.EFs[-2].force[2] = np.sum(B_Fa)
-            #     self.EFs[-1].force[2] = np.sum(A_Fa)
-            # elif self.supports[0].arr == "F2F":
-            #     self.EFs[-2].force[2] = np.sum(A_Fa)
-            #     self.EFs[-1].force[2] = np.sum(B_Fa)
         # Update the external forces on the shaft
         for support in self.supports:
             self.updateEFs([support.F_tot])
