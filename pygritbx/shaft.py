@@ -185,89 +185,154 @@ class Shaft(Component):
         K_a = np.zeros(3)
         for EF in self.EFs:
             K_a = K_a + (EF.force * self.axis)
+        K_a = np.sum(K_a)
+        print(f"Summation of external forces without bearing in the axial direction: {K_a} with sign {np.sign(K_a)}")
         # Find the bearing around which to apply moment
         index = 0
         for i in range(len(self.supports)):
             if self.supports[i].type == "Pin":
                 index = i
                 self.supports[index].F_tot = Force(np.zeros(3), self.supports[index].abs_loc)
+        print(f"Found pin bearing: '{self.supports[index].name}'")
         # Calculate reaction on other bearing
+        bearingSupportsAxial = False
         for i in range(len(self.supports)):
             if i != index:
+                if self.supports[i].bearingType == "Tapered" or self.supports[i].bearingType == "Contact Ball":
+                    bearingSupportsAxial = True
+                print(f"Calculating reaction on bearing '{self.supports[i].name}' by applying moment around bearing '{self.supports[index].name}'")
                 self.supports[i].F_tot = Force(np.zeros(3), self.supports[i].abs_loc)
                 supDist = self.supports[i].abs_loc - self.supports[index].abs_loc
                 supDist_rec = np.array([1/d if d != 0 else 0 for d in supDist])
+                print(f"Distance between two bearing: {supDist}")
                 for EF in self.EFs:
-                    momEF = EF.moment(self.supports[index].abs_loc) #np.cross(EF.force, (EF.loc - self.supports[index].abs_loc)) * 1e-3
+                    momEF = EF.moment(location=self.supports[index].abs_loc) #np.cross(EF.force, (EF.loc - self.supports[index].abs_loc)) * 1e-3
                     self.supports[i].F_tot.force += np.cross(momEF, supDist_rec) * 1e3
-                self.updateEFs([self.supports[i].F_tot])
+                print(f"Calculated total force on bearing '{self.supports[i].name}': {self.supports[i].F_tot.force}")
+                self.supports[index].F_tot.force -= self.supports[i].F_tot.force
+                #self.updateEFs([self.supports[i].F_tot])
         # Calculate reaction around bearing with sum of external forces
         for EF in self.EFs:
-            self.supports[index].F_tot.force -= EF.force
-        self.updateEFs([self.supports[index].F_tot])
+            if bearingSupportsAxial:
+                self.supports[index].F_tot.force -= EF.force*(1 - self.axis)
+            else:
+                self.supports[index].F_tot.force -= EF.force
+        
+        #self.updateEFs([self.supports[index].F_tot])
         # Update axial load based on configuration
-        if self.supports[0].bearingType == "Tapered" and self.supports[1].bearingType == "Tapered":
+        if (self.supports[0].bearingType == "Tapered" and self.supports[1].bearingType == "Tapered") or (self.supports[0].bearingType == "Contact Ball" and self.supports[1].bearingType == "Contact Ball"):
             if self.supports[0].shoulder == -1:
                 indA = 1
                 indB = 0
-                sgn = 1
             else:
                 indA = 0
                 indB = 1
-                sgn = -1
-            A_FrV = self.supports[indA].F_tot.force - self.supports[indA].F_tot.force * self.axis
+
+            print(f"Bearing 'A' from the shaft's pov: {self.supports[indA].name}")
+            print(f"Bearing 'B' from the shaft's pov: {self.supports[indB].name}")
+            btype = self.supports[indA].bearingType
+            A_FrV = self.supports[indA].F_tot.force - (self.supports[indA].F_tot.force * self.axis)
             A_Fr = np.sqrt(np.sum(A_FrV * A_FrV))
             A_Y = self.supports[indA].Y
-            B_FrV = self.supports[indB].F_tot.force - self.supports[indB].F_tot.force * self.axis
+            B_FrV = self.supports[indB].F_tot.force - (self.supports[indB].F_tot.force * self.axis)
             B_Fr = np.sqrt(np.sum(B_FrV * B_FrV))
             B_Y = self.supports[indB].Y
-            print(f"Axial reaction forces on {self.name}: ", end="")
-            # Case 1
-            if np.sum(K_a) > 0:
-                # Factor of comparison
-                fac = B_Fr / B_Y - A_Fr / A_Y
-                # Case 1a
-                if fac <= 0 and np.abs(np.sum(K_a)) >= 0:
-                    print("Case 1a")
-                    A_Fa = sgn * 0.5 * A_Fr / A_Y * self.axis
-                    B_Fa = -(A_Fa + K_a)
-                # Case 1b
-                elif fac > 0 and np.abs(np.sum(K_a)) >= 0.5 * fac:
-                    print("Case 1b")
-                    A_Fa = sgn * 0.5 * A_Fr / A_Y * self.axis
-                    B_Fa = -(A_Fa + K_a)
-                # Case 1c
-                elif fac > 0 and np.abs(np.sum(K_a)) < 0.5 * fac:
-                    print("Case 1c")
-                    B_Fa = -sgn * 0.5 * B_Fr / B_Y * self.axis
-                    A_Fa = -(B_Fa + K_a)
-            # Case 2
+            print(f"Axial reaction forces on {self.name} with {btype} bearings: ", end="")
+            # Tapered
+            if btype == "Tapered":
+                # Case 1
+                if K_a > 0:
+                    # Factor of comparison
+                    fac = (B_Fr / B_Y) - (A_Fr / A_Y)
+                    # Case 1a
+                    if fac <= 0:
+                        print("Case 1a")
+                        A_Fa = 0.5 * A_Fr / A_Y
+                        B_Fa = -(K_a + A_Fa)
+                    # Case 1b
+                    elif fac > 0 and K_a >= 0.5 * fac:
+                        print("Case 1b")
+                        A_Fa = 0.5 * A_Fr / A_Y
+                        B_Fa = -(K_a + A_Fa)
+                    # Case 1c
+                    elif fac > 0 and K_a < 0.5 * fac:
+                        print("Case 1c")
+                        B_Fa = -0.5 * B_Fr / B_Y
+                        A_Fa = -(K_a + B_Fa)
+                # Case 2
+                else:
+                    # Factor of comparison
+                    fac = A_Fr / A_Y - B_Fr / B_Y
+                    # Case 2a
+                    if fac <= 0 and np.abs(K_a) >= 0:
+                        print("Case 2a")
+                        B_Fa =  -0.5 * B_Fr / B_Y
+                        A_Fa = -(B_Fa + K_a)
+                    # Case 2b
+                    elif fac > 0 and np.abs(K_a) >= 0.5 * fac:
+                        print("Case 2b")
+                        B_Fa = -0.5 * B_Fr / B_Y
+                        A_Fa = -(B_Fa + K_a)
+                    # Case 2c
+                    elif fac > 0 and np.abs(K_a) < 0.5 * fac:
+                        print("Case 2c")
+                        A_Fa = 0.5 * A_Fr / A_Y
+                        B_Fa = -(A_Fa + K_a)
+            # Contact Ball
             else:
-                # Factor of comparison
-                fac = A_Fr / A_Y - B_Fr / B_Y
-                # Case 2a
-                if fac <= 0 and np.abs(np.sum(K_a)) >= 0:
-                    print("Case 2a")
-                    B_Fa = -sgn * 0.5 * B_Fr / B_Y * self.axis
-                    A_Fa = -(B_Fa + K_a)
-                # Case 2b
-                elif fac > 0 and np.abs(np.sum(K_a)) >= 0.5 * fac:
-                    print("Case 2b")
-                    B_Fa = -sgn * 0.5 * B_Fr / B_Y * self.axis
-                    A_Fa = -(B_Fa + K_a)
-                # Case 2c
-                elif fac > 0 and np.abs(np.sum(K_a)) < 0.5 * fac:
-                    print("Case 2c")
-                    A_Fa = sgn * 0.5 * A_Fr / A_Y * self.axis
-                    B_Fa = -sgn*(A_Fa + K_a)
-            self.supports[indA].F_tot.force[2] = np.sum(A_Fa)
-            self.supports[indB].F_tot.force[2] = np.sum(B_Fa)
-            if self.supports[0].arr == "B2B":
-                self.EFs[-2].force[2] = np.sum(B_Fa)
-                self.EFs[-1].force[2] = np.sum(A_Fa)
-            elif self.supports[0].arr == "F2F":
-                self.EFs[-2].force[2] = np.sum(A_Fa)
-                self.EFs[-1].force[2] = np.sum(B_Fa)
+                # Case 1
+                if K_a > 0:
+                    # Case 1a
+                    if A_Fr >= B_Fr:
+                        print("Case 1a")
+                        A_Fa = self.supports[indA].R * A_Fr
+                        B_Fa = -(A_Fa + K_a)
+                    # Case 1b
+                    elif (A_Fr < B_Fr) and (K_a >= self.supports[indA].R * (B_Fr - A_Fr)):
+                        print("Case 1b")
+                        A_Fa = self.supports[indA].R * A_Fr
+                        B_Fa = -(A_Fa + K_a)
+                    # Case 1c
+                    elif (A_Fr < B_Fr) and (K_a < self.supports[indA].R * (B_Fr - A_Fr)):
+                        print("Case 1c")
+                        B_Fa = -self.supports[indB].R * B_Fr
+                        A_Fa = -(B_Fa + K_a)
+                # Case 2
+                else:
+                    # Case 2a
+                    if A_Fr <= B_Fr:
+                        print("Case 2a")
+                        B_Fa = -self.supports[indB].R * B_Fr
+                        A_Fa = -(B_Fa + K_a)
+                    # Case 2b
+                    elif (A_Fr > B_Fr) and (np.abs(K_a) >= self.supports[indA].R * (A_Fr - B_Fr)):
+                        print("Case 2b")
+                        B_Fa = -self.supports[indB].R * B_Fr
+                        A_Fa = -(B_Fa + K_a)
+                    # Case 2c
+                    elif (A_Fr > B_Fr) and (np.abs(K_a) < self.supports[indA].R * (A_Fr - B_Fr)):
+                        print("Case 2c")
+                        A_Fa = self.supports[indA].R * A_Fr
+                        B_Fa = -(A_Fa + K_a)
+            
+            print(f"{self.supports[indA].name} total force before update: {self.supports[indA].F_tot.force}")
+            print(f"{self.supports[indA].name} axial force component: {A_Fa}")
+            print(f"{self.supports[indB].name} total force before update: {self.supports[indB].F_tot.force}")
+            print(f"{self.supports[indB].name} axial force component: {B_Fa}")
+            self.supports[indA].F_tot.force += (A_Fa * self.axis)
+            self.supports[indB].F_tot.force += (B_Fa * self.axis)
+            print(f"{self.supports[indA].name} total force after update: {self.supports[indA].F_tot.force}")
+            print(f"{self.supports[indB].name} total force after update: {self.supports[indB].F_tot.force}")
+
+            # if self.supports[0].arr == "B2B":
+            #     self.EFs[-2].force[2] = np.sum(B_Fa)
+            #     self.EFs[-1].force[2] = np.sum(A_Fa)
+            # elif self.supports[0].arr == "F2F":
+            #     self.EFs[-2].force[2] = np.sum(A_Fa)
+            #     self.EFs[-1].force[2] = np.sum(B_Fa)
+        # Update the external forces on the shaft
+        for support in self.supports:
+            self.updateEFs([support.F_tot])
         # Update support reaction to separate total radial force and axial force
         for support in self.supports:
             support.updateReaction()

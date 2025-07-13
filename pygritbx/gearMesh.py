@@ -35,7 +35,7 @@ class GearMesh:
             if np.shape(radiality)[0] == 1:
                 drivenGear.abs_loc = drivingGear.abs_loc + radiality[0] * (drivingGear.d + drivenGear.d) / 2
             else:
-                drivenGear.abs_loc = drivingGear.abs_loc + (radiality[0] * drivingGear.d + radiality[1] * drivenGear.d) / 2
+                drivenGear.abs_loc = drivingGear.abs_loc + (radiality[0] * drivingGear.d_av + radiality[1] * drivenGear.d_av) / 2
         # Given properties
         self.name = name
         self.drivingGear = drivingGear

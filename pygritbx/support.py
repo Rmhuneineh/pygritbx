@@ -4,32 +4,34 @@ This is the "Support" class. It inherits "Component" class.
 It defines the properties for SKF bearing supports:
 I) Given properties
 --> 1) "type": "Pin" / "Roller"
---> 2) "catalogueName": name of bearing as specified in catalogue
---> 3) "catalogueType": "Standard" / "Explorer"
---> 4) "d": bearing internal diamater expressed in [mm]
---> 5) "D": bearing external diameter expressed in [mm]
---> 6) "dm": bearing mean diameter expressed in [mm]
---> 7) "B": bearing width expressed in [mm]
---> 8) "C": dynamic basic load rating expressed in [N]
---> 9) "C0": static basic load rating expressed in [N]
---> 10) "Pu": fatigue load limit expressed in [N]
---> 11) "a": bearing pressure point offset expressed in [mm]
---> 12) "e": calculation factor 1
---> 13) "X": bearing radial load factor
---> 14) "Y": bearing axial load factor
---> 15) "Y0": calculation factor 2
---> 16) "Y1": calculation factor 3
---> 17) "Y2": calculation factor 4
---> 18) "A": bearing calculation factor 1
---> 19) "kr": minimium load factor
---> 20) "shoulder": "1" for +ve offser / "-1" for negative offset
---> 21) "F_a": axial reaction force expressed in [N]
---> 22) "F_r" radial reaction force expressed in [N]
---> 23) "arr": "Single" / "F2F" / "B2B" / "Tandem" / "Double row"
---> 24) "n": rotational speed expressed in [rpm]
---> 25) "nr": reference speed expressed in [rpm]
---> 26) "p": exponent for life equation
---> 27) "a_skf": lubrication, contamination, and fatigue limit factor
+--> 2) "bearingType": "Ball" / "Tapered" / "Contact Ball"
+--> 3) "catalogueName": name of bearing as specified in catalogue
+--> 4) "catalogueType": "Standard" / "Explorer"
+--> 5) "d": bearing internal diamater expressed in [mm]
+--> 6) "D": bearing external diameter expressed in [mm]
+--> 7) "dm": bearing mean diameter expressed in [mm]
+--> 8) "B": bearing width expressed in [mm]
+--> 9) "C": dynamic basic load rating expressed in [N]
+--> 10) "C0": static basic load rating expressed in [N]
+--> 11) "Pu": fatigue load limit expressed in [N]
+--> 12) "a": bearing pressure point offset expressed in [mm]
+--> 13) "e": calculation factor 1
+--> 14) "X": bearing radial load factor
+--> 15) "Y": bearing axial load factor
+--> 16) "Y0": calculation factor 2
+--> 17) "Y1": calculation factor 3
+--> 18) "Y2": calculation factor 4
+--> 19) "A": bearing calculation factor 1
+--> 20) "kr": minimium load factor
+--> 21) "R": contact ball bearing axial force constant
+--> 22) "shoulder": "1" for +ve offser / "-1" for negative offset
+--> 23) "F_a": axial reaction force expressed in [N]
+--> 24) "F_r" radial reaction force expressed in [N]
+--> 25) "arr": "Single" / "F2F" / "B2B" / "Tandem" / "Double row"
+--> 26) "n": rotational speed expressed in [rpm]
+--> 27) "nr": reference speed expressed in [rpm]
+--> 28) "p": exponent for life equation
+--> 29) "a_skf": lubrication, contamination, and fatigue limit factor
 
 II) Calculated properties:
 --> 1) "F_a": a 3-element vector representing the axial force exerted by the bearing expressed in [N]
@@ -64,7 +66,7 @@ class Support(Component):
 
     # Constructor
     def __init__(self, name="", type="", bearingType="", catalogueName="", catalogueType="", d=0, D=0, B=0,
-                C=0, C0=0, Pu=0, nr=0, a=0, e=0, X=0, Y=0, Y0=0, Y1=0, Y2=0, A=0, kr=0, shoulder=0, arr="",
+                C=0, C0=0, Pu=0, nr=0, a=0, e=0, X=0, Y=0, Y0=0, Y1=0, Y2=0, A=0, kr=0, R=0, shoulder=0, arr="",
                 axis=np.zeros(3), loc=0):
         super().__init__(name=name, material=None, axis=axis, loc=loc)
         self.type = type
@@ -87,6 +89,7 @@ class Support(Component):
         self.Y2 = Y2
         self.A = A
         self.kr = kr
+        self.R = R
         self.shoulder = shoulder
         self.nr = nr
         self.n = 0
