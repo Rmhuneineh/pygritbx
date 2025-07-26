@@ -101,11 +101,11 @@ class Support(Component):
         self.a_skf = 0
 
     # Life analysis
-    def performLifeAnalysis(self, rel=100, condition="", a_skf=0):
+    def performLifeAnalysis(self, rel=100, condition="", a_skf=0, oil=""):
         self.a_skf = a_skf
         print(f"Initiating Life Analysis on bearing {self.name}.")
         print(f"Checking minimum load condition.")
-        if self.calculateMinimumLoad():
+        if self.calculateMinimumLoad(oil=oil):
             print(f"Calculating static safety factor.")
             self.calculateEquivalentStaticLoad()
             print(f"Bearing {self.name}'s equivalent static load: {self.P0:.2f} [N].")
@@ -131,7 +131,7 @@ class Support(Component):
         self.F_r = np.sqrt(np.sum(F_rV * F_rV))
     
     # Minimum load calculation
-    def calculateMinimumLoad(self):
+    def calculateMinimumLoad(self, oil=""):
         if self.bearingType == "Tapered":
             if self.catalogueType == "Standard":
                 self.Frm = 0.02 * self.C
@@ -139,6 +139,8 @@ class Support(Component):
                 self.Frm = 0.017 * self.C
         elif self.bearingType == "Cylindrical":
             self.Frm = self.kr * (6 + 4 * abs(self.n) / self.nr) * (self.dm / 100) ** 2 * 1e3
+        elif self.bearingType == "Contact Ball":
+            self.Frm = self.kr * (oil.v * self.n / 1000) ** (2 / 3) * (self.dm / 100) ** 2
         else:
             raise ValueError(f"Bearing type '{self.bearingType}' not available.")
         if self.F_r != None:
@@ -185,6 +187,11 @@ class Support(Component):
                 self.P = self.F_r
             else:
                 self.P = 0.92 * self.F_r + self.Y * self.F_a
+        elif self.bearingType == "Contact Ball":
+            if ratioCond:
+                self.P = self.F_r
+            else:
+                self.P = self.X * self.F_r + self.Y2 * self.F_a
         else:
             raise ValueError("Bearing type not available.")
     
@@ -213,6 +220,10 @@ class Support(Component):
                 raise ValueError("Bearing arrangement not avaialabe.")
         if self.bearingType == "Cylindrical":
             self.P0 = self.F_r
+        elif self.bearingType == "Contact Ball":
+            self.P0 = 0.5 * self.F_r + self.Y0 * self.F_a
+            if self.P0 < self.F_r:
+                self.P0 + self.F_r
         self.s0 = self.C0 / self.P0
     
     # Calculate a1
