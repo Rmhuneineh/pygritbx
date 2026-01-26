@@ -44,9 +44,9 @@ class FatigueLimitCorrectorFactors:
         if section.sigma_m_N != 0 or section.sigma_a_N != 0:
             self.Cl_req = self.__class__.Cl_ref
         else:
-            self.Cl_req = 0
+            self.Cl_req = 1
         # Cs
-        if section.sigma_m_Mb != 0 or section.sigma_a_Mb != 0 or section.sigma_m_Mt != 0 or section.sigma_a_Mt != 0:
+        if section.sigma_m_Mb != 0 or section.sigma_a_Mb != 0 or section.tau_m_Mt != 0 or section.tau_a_Mt != 0:
             self.Cs_req = np.interp(section.d, self.__class__.d_ref, self.__class__.Cs_ref)
         else:
             self.Cs_req = 1
