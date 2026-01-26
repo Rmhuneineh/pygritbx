@@ -177,4 +177,7 @@ class ShaftSection:
         if P_x > inter_x:
             P_x = (coeff1[1] - coeff3[1]) / (coeff3[0] - coeff1[0])
         P_y = np.polyval(coeff3, P_x)
-        self.fatigueSF = P_y / self.sigma_a_eq
+        if self.sigma_a_eq != 0:
+            self.fatigueSF = P_y / self.sigma_a_eq
+        else:
+            self.fatigueSF = -1
