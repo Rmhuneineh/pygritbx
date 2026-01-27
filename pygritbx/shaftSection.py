@@ -118,11 +118,15 @@ class ShaftSection:
         coeff2 = np.polyfit(np.array([0, self.material.sigma_u]), np.array([self.material.sigma_Dm1C, 0]), deg=1)
         inter_x = (coeff2[1] - coeff1[1]) / (coeff1[0] - coeff2[0])
         inter_y = np.polyval(coeff1, inter_x)
-        coeff3 = np.polyfit(np.array([0, self.sigma_m_eq]), np.array([0, self.sigma_a_eq]), deg=1)
-        P_x = (coeff2[1] - coeff3[1]) / (coeff3[0] - coeff2[0])
-        if P_x > inter_x:
-            P_x = (coeff1[1] - coeff3[1]) / (coeff3[0] - coeff1[0])
-        P_y = np.polyval(coeff3, P_x)
+        if self.sigma_m_eq != 0:
+            coeff3 = np.polyfit(np.array([0, self.sigma_m_eq]), np.array([0, self.sigma_a_eq]), deg=1)
+            P_x = (coeff2[1] - coeff3[1]) / (coeff3[0] - coeff2[0])
+            if P_x > inter_x:
+                P_x = (coeff1[1] - coeff3[1]) / (coeff3[0] - coeff1[0])
+            P_y = np.polyval(coeff3, P_x)
+        else:
+            P_x = 0
+            P_y = self.material.sigma_Dm1C
         # Plot
         figure, ax = plt.subplots()
         ax.plot(np.array([0, inter_x, self.material.sigma_y]), np.array([self.material.sigma_Dm1C, inter_y, 0]), 'k', linewidth=1.5)
@@ -172,11 +176,17 @@ class ShaftSection:
         coeff1 = np.polyfit(np.array([0, self.material.sigma_y]), np.array([self.material.sigma_y, 0]), deg=1)
         coeff2 = np.polyfit(np.array([0, self.material.sigma_u]), np.array([self.material.sigma_Dm1C, 0]), deg=1)
         inter_x = (coeff2[1] - coeff1[1]) / (coeff1[0] - coeff2[0])
-        coeff3 = np.polyfit(np.array([0, self.sigma_m_eq]), np.array([0, self.sigma_a_eq]), deg=1)
-        P_x = (coeff2[1] - coeff3[1]) / (coeff3[0] - coeff2[0])
+        if self.sigma_m_eq != 0:
+            coeff3 = np.polyfit(np.array([0, self.sigma_m_eq]), np.array([0, self.sigma_a_eq]), deg=1)
+            P_x = (coeff2[1] - coeff3[1]) / (coeff3[0] - coeff2[0])
+        else:
+            P_x = 0
         if P_x > inter_x:
             P_x = (coeff1[1] - coeff3[1]) / (coeff3[0] - coeff1[0])
-        P_y = np.polyval(coeff3, P_x)
+        if self.sigma_m_eq != 0:
+            P_y = np.polyval(coeff3, P_x)
+        else:
+            P_y = self.material.sigma_Dm1C
         if self.sigma_a_eq != 0:
             self.fatigueSF = P_y / self.sigma_a_eq
         else:
