@@ -58,6 +58,15 @@ The properties can be manipulated or used via the following functions:
 from .component import Component
 from .force import Force
 import numpy as np
+from typing import Literal
+
+Type = Literal["Pin", "Roller"]
+BearingType = Literal["Ball", "Tapered", "Contact Ball"]
+CatalogueType = Literal["Standard", "Explorer"]
+Arrangement = Literal["Single", "F2F", "B2B", "Tandem", "Double row"]
+Condition = Literal["Extreme cleanliness", "High cleanliness", "Normal cleanliness", "Slight contamination", 
+                    "Typical contamination", "Severe contamination", "Very severe contamination"]
+
 class Support(Component):
 
     # Reference relibility factor
@@ -65,9 +74,10 @@ class Support(Component):
     a1_ref = np.array([1, 0.64, 0.55, 0.47, 0.37, 0.25])
 
     # Constructor
-    def __init__(self, name="", type="", bearingType="", catalogueName="", catalogueType="", d=0, D=0, B=0,
-                C=0, C0=0, Pu=0, nr=0, a=0, e=0, X=0, Y=0, Y0=0, Y1=0, Y2=0, A=0, kr=0, R=0, shoulder=0, arr="",
-                axis=np.zeros(3), loc=0):
+    def __init__(self, name="", type: Type="Pin", bearingType: BearingType="Ball", catalogueName="", 
+                 catalogueType: CatalogueType="Standard", d=0, D=0, B=0, C=0, C0=0, Pu=0, nr=0, a=0, e=0, X=0, 
+                 Y=0, Y0=0, Y1=0, Y2=0, A=0, kr=0, R=0, shoulder=0, arr: Arrangement="Single", axis=np.zeros(3), 
+                 loc=0):
         super().__init__(name=name, material=None, axis=axis, loc=loc)
         self.type = type
         self.bearingType = bearingType
@@ -101,7 +111,7 @@ class Support(Component):
         self.a_skf = 0
 
     # Life analysis
-    def performLifeAnalysis(self, rel=100, condition="", a_skf=0, oil=""):
+    def performLifeAnalysis(self, rel=100, condition: Condition="Normal cleanliness", a_skf=0, oil=""):
         self.a_skf = a_skf
         print(f"Initiating Life Analysis on bearing {self.name}.")
         print(f"Checking minimum load condition.")
@@ -231,7 +241,7 @@ class Support(Component):
         self.a1 = np.interp(rel, self.__class__.rel_ref, self.__class__.a1_ref)
     
     # Calculate contamination factor
-    def calculateEtaC(self, condition=""):
+    def calculateEtaC(self, condition: Condition="Normal cleanliness"):
         if condition == "Extreme cleanliness":
             self.eta_c = 1
         elif condition == "High cleanliness":
