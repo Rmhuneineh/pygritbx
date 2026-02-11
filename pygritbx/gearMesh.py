@@ -22,14 +22,18 @@ II) Calculated properties
 import numpy as np
 from .torque import Torque
 from .force import Force
+from typing import Literal
+
+Type = Literal["External", "Internal"]
+
 class GearMesh:
 
     # Constructor
-    def __init__(self, name="", drivingGear=None, drivenGear=None, radiality=np.zeros(3), type=""):
+    def __init__(self, name="", drivingGear=None, drivenGear=None, radiality=np.zeros(3), type: Type="External"):
         if drivingGear == None or drivenGear == None:
             raise ValueError("Driving or driven gear missing!")
         if drivingGear.m_n != drivenGear.m_n:
-            raise Exception("Incompatible Gear Mesh!")
+            raise Exception("Incompatible Gear Mesh: normal module must be equal!")
         # Update location of driven gear
         if drivenGear.abs_loc.size == 0:
             if np.shape(radiality)[0] == 1:
