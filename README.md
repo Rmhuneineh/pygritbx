@@ -58,6 +58,7 @@ For installation, make sure the proper environment is activated and execute the 
 - Automated static and fatigue verification for shafts by implmenting the **".performStaticVerification()"** and **".performFatigueVerification()"** functions in the Shaft class.
 - Automated gear tooth bending and gear tooth pitting analyses by implementing **".analyseGearToothBending()"** and **"analyseGearToothPitting()"** functions in the Gear class.
 - Modified examples according to latest implementations.
+- Added Lieral for categorizing certain parameters.
 
 ## References
 - Richard G. Budynas and J. Keith Nisbett, *Shigley's Mechanical Engineering Design*, McGraw-Hill, 2006.
