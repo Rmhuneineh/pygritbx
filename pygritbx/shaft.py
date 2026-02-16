@@ -363,7 +363,7 @@ class Shaft(Component):
         self.calculateFatigueSafetyFactor()
         print("Section Name: Fatigue Safety Factor")
         for section in self.sections:
-            print(f"{section.name}: {section.fatigueSF:.2f} [-].")
+            print(f"Section {section.name}: {section.fatigueSF:.2f} [-].")
         
     
     # Calculate internal loads
