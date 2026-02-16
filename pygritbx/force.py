@@ -9,7 +9,7 @@ import numpy as np
 class Force:
 
     # Constructor
-    def __init__(self, force=np.zeros(3), loc=0):
+    def __init__(self, force=np.zeros(3), loc=0.0):
         self.force = force
         self.loc = loc
     

@@ -75,8 +75,8 @@ class Support(Component):
 
     # Constructor
     def __init__(self, name="", type: Type="Pin", bearingType: BearingType="Ball", catalogueName="", 
-                 catalogueType: CatalogueType="Standard", d=0, D=0, B=0, C=0, C0=0, Pu=0, nr=0, a=0, e=0, X=0, 
-                 Y=0, Y0=0, Y1=0, Y2=0, A=0, kr=0, R=0, shoulder=0, arr: Arrangement="Single", axis=np.zeros(3), 
+                 catalogueType: CatalogueType="Standard", d=0.0, D=0.0, B=0.0, C=0.0, C0=0.0, Pu=0.0, nr=0.0, a=0.0, e=0.0, X=0.0, 
+                 Y=0.0, Y0=0.0, Y1=0.0, Y2=0.0, A=0.0, kr=0.0, R=0.0, shoulder=0, arr: Arrangement="Single", axis=np.zeros(3), 
                  loc=0):
         super().__init__(name=name, material=None, axis=axis, loc=loc)
         self.type = type
@@ -111,7 +111,7 @@ class Support(Component):
         self.a_skf = 0
 
     # Life analysis
-    def performLifeAnalysis(self, rel=100, condition: Condition="Normal cleanliness", a_skf=0, oil=""):
+    def performLifeAnalysis(self, rel=100.0, condition: Condition="Normal cleanliness", a_skf=0.0, oil=""):
         self.a_skf = a_skf
         print(f"Initiating Life Analysis on bearing {self.name}.")
         print(f"Checking minimum load condition.")
@@ -237,7 +237,7 @@ class Support(Component):
         self.s0 = self.C0 / self.P0
     
     # Calculate a1
-    def calculateA1(self, rel=100):
+    def calculateA1(self, rel=100.0):
         self.a1 = np.interp(rel, self.__class__.rel_ref, self.__class__.a1_ref)
     
     # Calculate contamination factor

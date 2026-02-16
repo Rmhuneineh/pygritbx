@@ -16,7 +16,7 @@ The component's specific fatigue limit at a specific section can be calculated v
 class Material:
 
     # Constructor
-    def __init__(self, name="", sigma_u=0, sigma_y=0, sigma_Dm1=0, HB=0):
+    def __init__(self, name="", sigma_u=0.0, sigma_y=0.0, sigma_Dm1=0.0, HB=0):
         self.name = name
         self.sigma_u = sigma_u
         self.sigma_y = sigma_y

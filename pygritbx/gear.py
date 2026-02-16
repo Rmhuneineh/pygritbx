@@ -111,7 +111,7 @@ class Gear(Component):
                        [158, 154, 152, 149, 141, 137]])
 
     # Constructor
-    def __init__(self, name="", axis=np.zeros(3), loc=0, m_n=0, z=0, psi=0, phi_n=0, Q_v=0, FW=0, material=None):
+    def __init__(self, name="", axis=np.zeros(3), loc=0.0, m_n=0.0, z=0, psi=0.0, phi_n=0.0, Q_v=0, FW=0.0, material=None):
         # Given parameters
         super().__init__(name=name, material=material, axis=axis, loc=loc)
         self.m_n = m_n

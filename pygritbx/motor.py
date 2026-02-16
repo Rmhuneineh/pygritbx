@@ -23,7 +23,7 @@ from math import pi
 class Motor(Component):
     
     # Constructor
-    def __init__(self, name="", loc=0, power=0, n=0, torque=Torque(np.array([]), np.array([])), axis=np.array([0, 0, 0])):
+    def __init__(self, name="", loc=0.0, power=0.0, n=0.0, torque=Torque(np.array([]), np.array([])), axis=np.array([0, 0, 0])):
         # Given properties
         super().__init__(name=name, material=None, axis=axis, loc=loc)
         # Check for valid input

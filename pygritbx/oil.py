@@ -12,7 +12,7 @@ The properties are:
 class Oil:
 
     # Constructor
-    def __init__(self, name="", temp=0, v1=0, v=0):
+    def __init__(self, name="", temp=0.0, v1=0.0, v=0.0):
         self.name = name
         self.temperature = temp
         self.v1 = v1

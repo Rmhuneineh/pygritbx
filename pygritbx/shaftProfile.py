@@ -36,8 +36,8 @@ class ShaftProfile:
     def __init__(self, name="", radii=np.array([]), locs=np.array([])):
         self.name = name
         # Geometry
-        self.radii = np.concatenate(([0], radii, [0]))
-        self.locs = np.concatenate(([locs[0]], locs, [locs[-1]]))
+        self.radii = np.concatenate(([0.0], radii, [0.0]))
+        self.locs = np.concatenate(([locs[0.0]], locs, [locs[-1]]))
         # Shaft
         self.shaft = None
         # Cross-sectional properties
@@ -58,7 +58,7 @@ class ShaftProfile:
         return False
     
     # Add Fillet
-    def addFillet(self, radius=0, quadrant=[], zOff=0, dOff=0):
+    def addFillet(self, radius=0.0, quadrant=[], zOff=0.0, dOff=0.0):
         for q in range(len(quadrant)):
             if quadrant[q] == 1:
                 theta = np.arange(pi, 3*pi/2, 0.1)

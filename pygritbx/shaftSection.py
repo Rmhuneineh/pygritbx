@@ -45,32 +45,32 @@ import matplotlib.pyplot as plt
 class ShaftSection:
 
     # Constructor
-    def __init__(self, name="", loc=0, d=0, Ra=0, material=None):
+    def __init__(self, name="", loc=0.0, d=0.0, Ra=0.0, material=None):
         self.name = name
         self.loc = loc
         self.d = d
         self.Ra = Ra
         self.material = material
         # initialize mean and alternating stresses to 0
-        self.sigma_m_Mb = 0
-        self.sigma_a_Mb = 0
-        self.sigma_m_N = 0
-        self.sigma_a_N = 0
-        self.tau_m_Mt = 0
-        self.tau_a_Mt = 0
+        self.sigma_m_Mb = 0.0
+        self.sigma_a_Mb = 0.0
+        self.sigma_m_N = 0.0
+        self.sigma_a_N = 0.0
+        self.tau_m_Mt = 0.0
+        self.tau_a_Mt = 0.0
         # initialize stress concentration raisers
-        self.Kt_B = 0
-        self.Kt_N = 0
-        self.Kt_T = 0
+        self.Kt_B = 0.0
+        self.Kt_N = 0.0
+        self.Kt_T = 0.0
         # initialize stress concentration factor
-        self.Kf_N = 1
-        self.Kf_B = 1
-        self.Kf_T = 1
+        self.Kf_N = 1.0
+        self.Kf_B = 1.0
+        self.Kf_T = 1.0
         # initialize static safety factor
-        self.staticSF = 0
+        self.staticSF = 0.0
     
     # Append fatigue stress intensification factor
-    def appendKf(self, Kf=0, loadType=""):
+    def appendKf(self, Kf=0.0, loadType=""):
         for kf, lt in zip(Kf, loadType):
             if lt == "Normal":
                 self.Kf_N = self.Kf_N * kf
@@ -88,13 +88,13 @@ class ShaftSection:
         self.appendKf([1 + self.q.qReq * (self.Kt_T - 1)], ["Torsion"])
 
     # Notch Sensitivity
-    def addNotchSensitivity(self, notchRadius=0, sigma_u=0):
+    def addNotchSensitivity(self, notchRadius=0.0, sigma_u=0.0):
         self.q = NotchSensitivity(notchRadius=notchRadius, sigma_u=sigma_u)
         if self.Kt_B == None and self.Kt_N == None and self.Kt_T == None:
             self.calculateFatigueIntensificationFactor(self)
     
     #Geomtric Stress Raiser
-    def addGeometricStressRaiser(self, r2d=0, D2d=0):
+    def addGeometricStressRaiser(self, r2d=0.0, D2d=0.0):
         temp = GeometricStressRaiser(r2d, D2d)
         self.Kt_B = temp.Kt_Breq
         self.Kt_N = temp.Kt_Nreq
@@ -164,11 +164,11 @@ class ShaftSection:
         for j in range(len(profile.locs)):
             if zV >= profile.locs[j] and zV < profile.locs[j + 1]:
                 self.sigma_m_N = profile.sigma_N[j]                    
-                self.sigma_a_N = 0                    
-                self.sigma_m_Mb = 0                    
+                self.sigma_a_N = 0.0
+                self.sigma_m_Mb = 0.0
                 self.sigma_a_Mb = profile.sigma_Mb[j]                    
                 self.tau_m_Mt = profile.tau_Mt[j]
-                self.tau_a_Mt = 0
+                self.tau_a_Mt = 0.0
     
     # Calculate Fatigue Safety Factor
     def calculateSectionFatigueSafetyFactor(self):

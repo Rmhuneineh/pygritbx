@@ -9,7 +9,7 @@ import numpy as np
 class Torque:
 
     # Constructor
-    def __init__(self, torque=np.zeros(3), loc=0):
+    def __init__(self, torque=np.zeros(3), loc=0.0):
         self.torque = torque
         self.loc = loc
     

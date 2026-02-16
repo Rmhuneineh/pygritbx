@@ -48,7 +48,7 @@ from math import pi
 class Shaft(Component):
 
     # Constructor
-    def __init__(self, name="", inputs=[], outputs=[], axis=np.zeros(3), material=None, sups=[], loc=0):
+    def __init__(self, name="", inputs=[], outputs=[], axis=np.zeros(3), material=None, sups=[], loc=0.0):
         # Given parameters
         super().__init__(name=name, material=material, axis=axis, loc=loc, omega=inputs[0].omega)
         # Update shaft's absolute location

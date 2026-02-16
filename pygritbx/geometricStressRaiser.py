@@ -81,7 +81,7 @@ class GeometricStressRaiser():
     interp_func_T = Makima2DInterpolator(r2d_T, D2d_T, Kt_Tref)
 
     # Constructor
-    def __init__(self, r2d=0, D2d=0):
+    def __init__(self, r2d=0.0, D2d=0.0):
         # Bending
         self.Kt_Breq = self.__class__.interp_func_B(r2d, D2d)
         if self.Kt_Breq < 1:
@@ -96,7 +96,7 @@ class GeometricStressRaiser():
             self.Kt_Treq = 1
     
     # Plot Reference Geometric Stress Raiser
-    def plotKtRef(self, r2d=0, D2d=0, Kt=0, title=""):
+    def plotKtRef(self, r2d=0.0, D2d=0.0, Kt=0.0, title=""):
         plt.figure()
         for i in range(Kt.shape[0]):
             plt.plot(r2d, Kt[i], linewidth=1.5,label="D/d:" + str(D2d[i]))
