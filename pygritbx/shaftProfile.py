@@ -37,7 +37,7 @@ class ShaftProfile:
         self.name = name
         # Geometry
         self.radii = np.concatenate(([0.0], radii, [0.0]))
-        self.locs = np.concatenate(([locs[0.0]], locs, [locs[-1]]))
+        self.locs = np.concatenate(([locs[0]], locs, [locs[-1]]))
         # Shaft
         self.shaft = None
         # Cross-sectional properties
@@ -95,13 +95,21 @@ class ShaftProfile:
     
     # Plot Profile
     def plotProfile(self, ax=None):
-        ax1 = ax.twinx()
+        if ax == None:
+            from matplotlib import pyplot as plt
+            fig, ax1 = plt.subplots()
+        else:
+            ax1 = ax.twinx()
         ax1.plot(self.locs, self.radii, 'r', linewidth=1.5)
         ax1.plot(self.locs, -self.radii, 'r', linewidth=1.5)
         window = (self.locs[-1] - self.locs[0] + 20) / 2
         ax1.set_xlim(-0.1 * window, 2 * window)
         ax1.set_ylim(-window, window)
         ax1.set_ylabel("Profile [mm]")
+        if ax == None:
+            plt.title(self.name)
+            plt.grid()
+            plt.show()
     
     # Calculate Profile Stresses
     def calculateProfileStresses(self):
